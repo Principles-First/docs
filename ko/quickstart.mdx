@@ -1,0 +1,166 @@
+---
+title: "빠른 설치"
+description: "Moss AI SDK 시작하기"
+icon: "rocket"
+---
+
+# 빠른 시작 가이드
+
+몇 단계만으로 AI 어시스턴트를 실행하세요. 아래에서 플랫폼을 선택하고 코드 스니펫을 복사하여 시작하세요.
+
+<Info>
+    [Moss 대시보드](https://dashboard.viamoss.ai)에서 **애플리케이션 ID**가
+    필요합니다.
+</Info>
+
+## 설치
+
+<Tabs>
+  <Tab title="HTML / Vanilla JS">
+    HTML 파일에 이 스크립트 태그를 추가하세요:
+
+    ```html
+    <script src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID"></script>
+    ```
+
+    <Warning>
+      `YOUR_APP_ID`를 실제 애플리케이션 ID로, `USER_ID`를 사용자의 고유 식별자로 교체하세요.
+    </Warning>
+
+  </Tab>
+
+  <Tab title="Next.js">
+    루트 레이아웃에 SDK를 추가하세요:
+
+    ```tsx app/layout.tsx
+    import Script from 'next/script'
+
+    export default function RootLayout({ children }) {
+      return (
+        <html>
+          <head>
+            <Script
+              src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId={userId}"
+            />
+          </head>
+          <body>{children}</body>
+        </html>
+      )
+    }
+    ```
+
+    <Tip>
+      `{userId}`를 인증 시스템의 실제 사용자 변수로 교체하세요.
+    </Tip>
+
+  </Tab>
+
+  <Tab title="React">
+    React 훅을 사용하여 SDK를 동적으로 추가하세요:
+
+    ```tsx App.tsx
+    import { useEffect } from 'react'
+
+    function App() {
+      useEffect(() => {
+        const script = document.createElement('script')
+        script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID'
+        script.async = true
+        document.head.appendChild(script)
+
+        return () => {
+          if (document.head.contains(script)) {
+            document.head.removeChild(script)
+          }
+        }
+      }, [])
+
+      return <div>Your App</div>
+    }
+    ```
+
+    <Warning>
+      `YOUR_APP_ID`와 `USER_ID`를 실제 값으로 교체하는 것을 잊지 마세요.
+    </Warning>
+
+  </Tab>
+
+  <Tab title="Vue.js">
+    메인 Vue 컴포넌트에 SDK를 추가하세요:
+
+    ```vue App.vue
+    <script setup>
+    import { onMounted, onUnmounted } from 'vue'
+
+    let script = null
+
+    onMounted(() => {
+      script = document.createElement('script')
+      script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID'
+      script.async = true
+      document.head.appendChild(script)
+    })
+
+    onUnmounted(() => {
+      if (script && document.head.contains(script)) {
+        document.head.removeChild(script)
+      }
+    })
+    </script>
+
+    <template>
+      <div>Your App</div>
+    </template>
+    ```
+
+  </Tab>
+
+  <Tab title="Angular">
+    메인 컴포넌트에 SDK를 추가하세요:
+
+    ```typescript app.component.ts
+    import { Component, OnInit, OnDestroy } from '@angular/core';
+
+    @Component({
+      selector: 'app-root',
+      templateUrl: './app.component.html'
+    })
+    export class AppComponent implements OnInit, OnDestroy {
+      private script: HTMLScriptElement | null = null;
+
+      ngOnInit() {
+        this.script = document.createElement('script');
+        this.script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID';
+        this.script.async = true;
+        document.head.appendChild(this.script);
+      }
+
+      ngOnDestroy() {
+        if (this.script && document.head.contains(this.script)) {
+          document.head.removeChild(this.script);
+        }
+      }
+    }
+    ```
+
+  </Tab>
+</Tabs>
+
+## 다음 단계
+
+완료했습니다! 이제 Moss AI 어시스턴트가 애플리케이션에 플로팅 액션 버튼으로 나타납니다.
+
+<CardGroup cols={2}>
+    <Card title="설정" icon="gear" href="/ko/configurations/settings-reference">
+        SDK 환경설정
+    </Card>
+</CardGroup>
+
+## 도움이 필요하신가요?
+
+<Tip>
+    애플리케이션 ID, API 키 및 자세한 분석을 위해
+    [대시보드](https://dashboard.viamoss.ai)를 확인하세요.
+</Tip>
+
+문제가 발생하면 지원팀에 문의하거나 문제 해결 가이드를 확인하세요.

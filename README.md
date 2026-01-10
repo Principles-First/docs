@@ -1,43 +1,81 @@
-# Mintlify Starter Kit
+# Moss Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+Official documentation for the Moss AI assistant. Built with [Mintlify](https://mintlify.com).
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Overview
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+This documentation provides comprehensive configuration guidance for integrating and customizing Moss, an AI-powered assistant that helps users navigate and interact with your application.
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+## Structure
 
-## Development
+### Directory Structure
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+The documentation uses language-specific directories for internationalization:
 
 ```
-npm i -g mint
+docs/
+├── en/                     # English content
+│   ├── index.mdx          # Homepage
+│   └── configurations/
+│       └── settings-reference.mdx
+├── ko/                     # Korean content
+│   ├── index.mdx          # 홈페이지
+│   └── configurations/
+│       └── settings-reference.mdx
+└── docs.json              # Configuration
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+### Internationalization (i18n)
 
+This documentation supports multiple languages:
+
+-   **English (en)** - Default language (files in `en/` directory)
+-   **Korean (ko)** - Korean translation (files in `ko/` directory)
+
+Each language has its own directory with a complete set of translated documentation files.
+
+## Local Development
+
+Install dependencies:
+
+```bash
+npm install
 ```
-mint dev
+
+Run the development server:
+
+```bash
+npm run dev
 ```
 
-View your local preview at `http://localhost:3000`.
+The documentation will be available at `http://localhost:3000`.
 
-## Publishing changes
+## Configuration
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+The documentation is configured through `docs.json`:
 
-## Need help?
+-   **i18n**: English (default) and Korean language support
+-   **Navigation**: Simple structure with Getting Started and Configuration sections
+-   **Branding**: Moss logo and black/white color scheme
+-   **Theme**: Mintlify mint theme
 
-### Troubleshooting
+## Logo
 
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
+The Moss logo is located in `/logo/`:
 
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+-   `light.svg` - Logo for light theme
+-   `dark.svg` - Logo for dark theme
+
+Both use the same SVG with a black background and white foreground design.
+
+## About Moss
+
+Moss is an AI-powered assistant that provides contextual guidance to users within your application. Key features include:
+
+-   Vision-based screen understanding
+-   Session replay and analytics
+-   Multi-step planning capabilities
+-   Customizable behavior through dashboard and SDK
+-   Screen history tracking for improved context
+
+For more information about Moss, visit [viamoss.ai](https://viamoss.ai).
