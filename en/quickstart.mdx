@@ -1,0 +1,170 @@
+---
+title: "Quick Start"
+description: "Get started with Moss AI SDK in minutes"
+icon: "rocket"
+---
+
+# Quick Start Guide
+
+Get your AI assistant up and running in just a few steps. Choose your platform below and copy the code snippet to get started.
+
+<Info>
+    You'll need your **Application ID** from the [Moss
+    Dashboard](https://dashboard.viamoss.ai).
+</Info>
+
+## Installation
+
+<Tabs>
+  <Tab title="HTML / Vanilla JS">
+    Add this script tag to your HTML file:
+
+    ```html
+    <script src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID"></script>
+    ```
+
+    <Warning>
+      Replace `YOUR_APP_ID` with your actual Application ID and `USER_ID` with a unique identifier for your user.
+    </Warning>
+
+  </Tab>
+
+  <Tab title="Next.js">
+    Add the SDK to your root layout:
+
+    ```tsx app/layout.tsx
+    import Script from 'next/script'
+
+    export default function RootLayout({ children }) {
+      return (
+        <html>
+          <head>
+            <Script
+              src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId={userId}"
+            />
+          </head>
+          <body>{children}</body>
+        </html>
+      )
+    }
+    ```
+
+    <Tip>
+      Replace `{userId}` with your actual user variable from your authentication system.
+    </Tip>
+
+  </Tab>
+
+  <Tab title="React">
+    Add the SDK dynamically using React hooks:
+
+    ```tsx App.tsx
+    import { useEffect } from 'react'
+
+    function App() {
+      useEffect(() => {
+        const script = document.createElement('script')
+        script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID'
+        script.async = true
+        document.head.appendChild(script)
+
+        return () => {
+          if (document.head.contains(script)) {
+            document.head.removeChild(script)
+          }
+        }
+      }, [])
+
+      return <div>Your App</div>
+    }
+    ```
+
+    <Warning>
+      Don't forget to replace `YOUR_APP_ID` and `USER_ID` with actual values.
+    </Warning>
+
+  </Tab>
+
+  <Tab title="Vue.js">
+    Add the SDK in your main Vue component:
+
+    ```vue App.vue
+    <script setup>
+    import { onMounted, onUnmounted } from 'vue'
+
+    let script = null
+
+    onMounted(() => {
+      script = document.createElement('script')
+      script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID'
+      script.async = true
+      document.head.appendChild(script)
+    })
+
+    onUnmounted(() => {
+      if (script && document.head.contains(script)) {
+        document.head.removeChild(script)
+      }
+    })
+    </script>
+
+    <template>
+      <div>Your App</div>
+    </template>
+    ```
+
+  </Tab>
+
+  <Tab title="Angular">
+    Add the SDK in your main component:
+
+    ```typescript app.component.ts
+    import { Component, OnInit, OnDestroy } from '@angular/core';
+
+    @Component({
+      selector: 'app-root',
+      templateUrl: './app.component.html'
+    })
+    export class AppComponent implements OnInit, OnDestroy {
+      private script: HTMLScriptElement | null = null;
+
+      ngOnInit() {
+        this.script = document.createElement('script');
+        this.script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID';
+        this.script.async = true;
+        document.head.appendChild(this.script);
+      }
+
+      ngOnDestroy() {
+        if (this.script && document.head.contains(this.script)) {
+          document.head.removeChild(this.script);
+        }
+      }
+    }
+    ```
+
+  </Tab>
+</Tabs>
+
+## What's Next?
+
+That's it! The Moss AI assistant will now appear as a floating action button in your application.
+
+<CardGroup cols={2}>
+    <Card
+        title="Configuration"
+        icon="gear"
+        href="/en/configurations/settings-reference"
+    >
+        Customize the SDK behavior and appearance
+    </Card>
+</CardGroup>
+
+## Need Help?
+
+<Tip>
+    Check out the [Dashboard](https://dashboard.viamoss.ai) for your Application
+    ID, API keys, and detailed analytics.
+</Tip>
+
+If you encounter any issues, please contact our support team or check the troubleshooting guide.

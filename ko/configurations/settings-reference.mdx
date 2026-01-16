@@ -1,0 +1,809 @@
+---
+title: "설정 참조"
+description: "대시보드 설정, SDK 초기화 및 런타임 옵션을 통한 Moss AI 어시스턴트 설정 완벽 가이드"
+---
+
+## 개요
+
+Moss SDK는 애플리케이션의 필요에 맞게 여러 가지 방법으로 설정할 수 있습니다. 이 가이드는 모든 설정 방법을 다룹니다:
+
+1. **대시보드 설정** - 애플리케이션 수준 설정 관리를 위한 웹 UI
+2. **SDK 초기화** - SDK 로드 시 JavaScript 설정
+3. **런타임 API** - JavaScript를 통한 동적 설정 변경
+
+<Tip>
+    대시보드 설정은 SDK 초기화 옵션으로 재정의할 수 있는 기본값을 제공합니다.
+    런타임 API 호출을 통한 설정은 가장 우선시 됩니다.
+</Tip>
+
+## 설정 우선순위
+
+동일한 설정이 여러 곳에서 구성된 경우, Moss는 다음 우선순위를 사용합니다(높음에서 낮음):
+
+1. **런타임 API 호출** - `window.Moss.configure()`
+2. **SDK 초기화 매개변수** - 스크립트 태그 또는 생성자 옵션
+3. **대시보드 설정** - 애플리케이션 수준 기본값
+
+<Info>
+    이를 통해 대시보드에서 합리적인 기본값을 설정하면서 개발자에게 사용자 또는
+    세션별 세밀한 제어를 제공할 수 있습니다.
+</Info>
+
+---
+
+## 애플리케이션 정보
+
+대시보드에서 애플리케이션의 메타데이터 및 식별 설정을 보고 관리합니다.
+
+### 애플리케이션 이름
+
+대시보드에서 애플리케이션의 표시 이름입니다. 이 필드는 현재 읽기 전용입니다.
+
+### 애플리케이션 ID
+
+고유한 애플리케이션 식별자입니다. SDK를 통합할 때 사용하세요.
+
+### 생성 날짜
+
+애플리케이션이 생성된 날짜입니다.
+
+### UI 언어
+
+SDK 인터페이스에서 최종 사용자에게 표시되는 언어를 제어합니다.
+
+**기본값:** 자동 (사용자의 브라우저 언어 감지)
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 애플리케이션 정보**로 이동하여 언어 드롭다운에서 선택하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      language: 'ko' // 'en', 'ko' 또는 자동의 경우 undefined
+    })
+    ```
+  </Tab>
+  <Tab title="런타임">
+    ```javascript
+    window.Moss.configure({ language: 'ko' })
+    ```
+  </Tab>
+  <Tab title="URL 매개변수">
+    ```html
+    <script src="...?language=ko"></script>
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+    "자동"(또는 SDK에서 undefined)으로 설정하면 Moss는 자동으로 사용자가
+    선호하는 브라우저 언어를 감지하고 사용합니다.
+</Info>
+
+---
+
+## 일반 설정
+
+애플리케이션의 핵심 AI 어시스턴트 기능을 설정합니다.
+
+### 비전 활성화
+
+SDK가 스크린샷 및 시각적 콘텐츠를 처리하고 분석할 수 있도록 허용합니다. 활성화되면 AI 어시스턴트가 사용자의 화면을 "볼" 수 있고 더 맥락적인 안내를 제공할 수 있습니다.
+
+**기본값:** `true`
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 일반 설정 > 핵심 기능**으로 이동하여 "비전 활성화"를 토글하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      useVision: true // 비활성화하려면 false
+    })
+    ```
+  </Tab>
+  <Tab title="런타임">
+    ```javascript
+    // 비전 설정은 일반적으로 애플리케이션 수준에서 설정됩니다
+    // 런타임 제어가 필요한 경우 지원팀에 문의하세요
+    ```
+  </Tab>
+</Tabs>
+
+**사용 사례:**
+
+-   시각적 문제 해결
+-   UI 요소 식별
+-   스크린샷 기반 안내
+
+<Tip>
+    사용자가 특정 UI 요소를 찾는 데 도움이 필요하거나 AI가 시각적 맥락을
+    제공하도록 하려면 이 기능을 활성화하세요.
+</Tip>
+
+### 세션 리플레이 활성화
+
+대시보드에서 재생하기 위해 사용자 세션을 기록하고 업로드합니다. 이를 통해 사용자 상호 작용을 검토하고 문제를 디버그할 수 있습니다.
+
+**기본값:** `true`
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 일반 설정 > 핵심 기능**으로 이동하여 "세션 리플레이 활성화"를 토글하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      enableSessionRecording: true
+    })
+    ```
+  </Tab>
+  <Tab title="런타임">
+    ```javascript
+    window.Moss.configure({ 
+      enableSessionRecording: false // 개인정보 보호가 민감한 사용자의 경우 비활성화
+    })
+    ```
+  </Tab>
+</Tabs>
+
+**기록되는 내용:**
+
+-   사용자 상호 작용 (클릭, 입력, 탐색)
+-   DOM 구조 변경
+-   타임스탬프 및 세션 메타데이터
+
+<Warning>
+    세션 기록에는 민감한 사용자 데이터가 포함될 수 있습니다. 적절한 개인정보
+    보호 정책과 사용자 동의가 있는지 확인하세요.
+</Warning>
+
+### AI를 위한 화면 히스토리 활성화
+
+사용자 작업 히스토리 (클릭, 입력, 탐색) 및 DOM 변경 사항을 AI의 컨텍스트에 포함합니다. 이는 AI에게 사용자의 여정에 대한 더 풍부한 이해를 제공합니다.
+
+**기본값:** `true`
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 일반 설정 > 핵심 기능**으로 이동하여 "AI를 위한 화면 히스토리 활성화"를 토글하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      enableScreenHistoryRecording: true
+    })
+    ```
+  </Tab>
+  <Tab title="런타임">
+    ```javascript
+    window.Moss.configure({ 
+      enableScreenHistoryRecording: true 
+    })
+    ```
+  </Tab>
+</Tabs>
+
+**이점:**
+
+-   더 맥락적인 AI 응답
+-   사용자 의도에 대한 더 나은 이해
+-   개선된 다단계 안내
+
+### AI 어시스턴트 지침
+
+AI 어시스턴트가 애플리케이션을 탐색하거나 문서를 통해 사용할 수 없는 맥락을 제공하는 데 도움이 되는 사용자 정의 지침을 제공합니다.
+
+**기본값:** 비어 있음  
+**최대:** 30,000자
+
+<Note>**구성:** 대시보드 및 API 전용 (SDK 초기화에서는 사용 불가)</Note>
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 일반 설정 > AI 어시스턴트 지침**으로 이동하여 텍스트 영역에 사용자 정의 지침을 입력하세요.
+  </Tab>
+  <Tab title="API">
+    ```javascript
+    // API 클라이언트를 사용하여 프로그래밍 방식으로 지침 업데이트
+    fetch(`/api/applications/${applicationId}/instructions`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        instructions: '여기에 사용자 정의 지침...'
+      })
+    })
+    ```
+  </Tab>
+</Tabs>
+
+**포함할 내용:**
+
+-   애플리케이션에 고유한 특정 탐색 패턴
+-   중요한 UI 맥락 또는 워크플로 정보
+-   특별한 고려사항 또는 엣지 케이스
+-   도메인에 특정한 용어 또는 개념
+
+**예시:**
+
+```
+사용자가 '대시보드'에 대해 질문할 때 항상 개요가 아닌 분석 섹션으로 먼저 안내하세요.
+기본 탐색 메뉴는 모바일 기기에서 접히며 왼쪽 상단 모서리의 햄버거 아이콘을 클릭해야 합니다.
+```
+
+<Tip>
+    명확하고 간결한 언어를 사용하세요. AI는 사용자를 도울 때 이러한 지침을
+    통합합니다.
+</Tip>
+
+---
+
+## 사용자 경험
+
+플래닝 기능 및 세션 동작을 설정합니다.
+
+### 플래닝 설정
+
+복잡한 사용자 작업을 위한 AI 기반 다단계 플래닝을 활성화합니다.
+
+#### 플래닝 활성화
+
+플래닝 기능을 완전히 켜거나 끕니다.
+
+**기본값:** `false`
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 사용자 경험 > 플래닝 설정**으로 이동하여 "플래닝 활성화"를 토글하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      planning: {
+        enabled: true
+      }
+    })
+    ```
+  </Tab>
+  <Tab title="런타임">
+    ```javascript
+    window.Moss.configure({
+      planning: { enabled: true }
+    })
+    ```
+  </Tab>
+</Tabs>
+
+활성화되면 AI는 복잡한 작업을 여러 단계로 나누고 순차적으로 실행할 수 있습니다.
+
+#### 최대 단계 수
+
+단일 계획에서 허용되는 최대 단계 수입니다.
+
+**기본값:** `10`  
+**범위:** 1-20
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 사용자 경험 > 플래닝 설정**으로 이동하여 "최대 단계 수" 입력을 조정하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      planning: {
+        enabled: true,
+        maxSteps: 15
+      }
+    })
+    ```
+  </Tab>
+  <Tab title="런타임">
+    ```javascript
+    window.Moss.configure({
+      planning: { maxSteps: 20 }
+    })
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+    값이 높을수록 더 복잡한 다단계 작업이 가능하지만 완료하는 데 시간이 더 걸릴
+    수 있습니다.
+</Info>
+
+#### 사용자 건너뛰기 허용
+
+사용자가 계획의 개별 단계를 건너뛸 수 있도록 허용합니다.
+
+**기본값:** 활성화
+
+활성화되면 사용자는 이미 완료했거나 수동으로 처리하고자 하는 단계를 건너뛸 수 있습니다.
+
+#### 계획 개요 표시
+
+실행 전에 사용자에게 전체 계획 개요를 표시합니다.
+
+**기본값:** 활성화
+
+조치를 취하기 전에 AI가 무엇을 할 계획인지 사용자에게 보여주어 투명성과 신뢰를 향상시킵니다.
+
+### 세션 동작
+
+사용자 세션이 관리되고 타임아웃되는 방법을 설정합니다.
+
+#### 비활동 타임아웃
+
+비활성 세션이 만료된 것으로 간주되기 전의 시간(분)입니다.
+
+**기본값:** 30분
+
+이 기간 동안 비활성 상태이면 사용자를 위한 새 세션이 생성됩니다.
+
+#### 최대 세션 기간
+
+활동과 관계없이 최대 세션 지속 시간(시간)입니다.
+
+**기본값:** 2시간
+
+사용자가 활성 상태이더라도 이 기간이 지나면 세션이 자동으로 만료됩니다.
+
+#### 알림 표시
+
+새 세션을 시작할 때 알림을 표시합니다.
+
+**기본값:** 활성화
+
+활성화되면 새 세션이 시작될 때 사용자에게 알림이 표시됩니다.
+
+---
+
+## 보안
+
+SDK에 대한 액세스 및 보안 설정을 제어합니다.
+
+### 도메인 액세스 제어
+
+무단 사용을 방지하기 위해 SDK를 사용할 수 있는 도메인을 제한합니다.
+
+**기본값:** 비어 있음 (모든 도메인 허용)
+
+<Note>**구성:** 대시보드 전용</Note>
+
+**작동 방식:**
+
+-   목록이 비어 있으면 SDK가 모든 도메인에서 작동합니다
+-   도메인이 지정되면 SDK가 해당 도메인에서만 작동합니다
+-   와일드카드는 지원되지 않습니다
+
+**허용된 도메인 예시:**
+
+```
+app.example.com
+staging.example.com
+localhost:3000
+```
+
+<Warning>
+    도메인을 제한할 때 주의하세요. 애플리케이션이 실행되는 모든 환경(프로덕션,
+    스테이징, 개발)을 포함해야 합니다.
+</Warning>
+
+---
+
+## 개발자 옵션
+
+개발자를 위한 고급 설정 및 기술 구성입니다.
+
+<Info>
+    일부 개발자 설정은 **대시보드 전용**(API 키, 벡터 저장소, 위험 영역)이며,
+    기술적인 SDK 설정은 SDK 초기화를 통해 구성할 수 있습니다.
+</Info>
+
+### API 키
+
+SDK 인증을 위한 API 키를 관리합니다.
+
+<Note>**구성:** 대시보드 전용</Note>
+
+#### 현재 API 키
+
+활성 프로덕션 API 키입니다. 전체 키는 생성될 때 한 번만 표시됩니다.
+
+<Warning>
+    API 키는 민감합니다. 안전하게 저장하고 버전 관리에 커밋하지 마세요.
+</Warning>
+
+#### API 키 재생성
+
+새 API 키를 생성하고 이전 키를 무효화합니다.
+
+<Danger>
+    API 키를 재생성하면 이전 키가 즉시 무효화됩니다. 이전 키를 사용하는 모든
+    애플리케이션이 작동을 멈춥니다.
+</Danger>
+
+### 고급 SDK 설정
+
+디버깅 및 고급 사용자 정의를 위한 기술 설정입니다.
+
+#### 스크린샷 모드
+
+스크린샷을 캡처하는 방법을 선택합니다.
+
+**기본값:** 전체 페이지
+
+**옵션:**
+
+-   **전체 페이지:** 전체 스크롤 가능한 페이지 캡처
+-   **뷰포트:** 페이지의 보이는 부분만 캡처
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 개발자 옵션 > 고급 SDK 설정**으로 이동하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      screenshotMode: 'viewport' // 또는 'fullpage'
+    })
+    ```
+  </Tab>
+</Tabs>
+
+#### 로그 레벨
+
+SDK 로깅 상세 수준을 제어합니다.
+
+**기본값:** INFO  
+**옵션:** ERROR, WARN, INFO, DEBUG
+
+높은 수준에는 모든 낮은 수준이 포함됩니다 (DEBUG에는 모든 것이 포함됨).
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 개발자 옵션 > 고급 SDK 설정**으로 이동하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      logLevel: 'DEBUG'
+    })
+    ```
+  </Tab>
+</Tabs>
+
+#### DOM 타겟 선택자
+
+변경 사항을 관찰할 DOM 요소의 CSS 선택자입니다.
+
+**기본값:** `body`
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 개발자 옵션 > 고급 SDK 설정**으로 이동하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      observeTargetSelector: '#main-content'
+    })
+    ```
+  </Tab>
+</Tabs>
+
+<Info>페이지의 특정 부분으로 SDK 관찰을 제한하려면 이것을 변경하세요.</Info>
+
+#### 디버그 모드
+
+자세한 로깅 및 디버그 기능을 활성화합니다.
+
+**기본값:** 비활성화
+
+SDK 통합 문제를 해결하는 데 유용합니다.
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 개발자 옵션 > 고급 SDK 설정**으로 이동하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      debugMode: true
+    })
+    ```
+  </Tab>
+</Tabs>
+
+#### DOM 안정성 전략
+
+스크린샷을 찍기 전에 SDK가 DOM 변경이 안정화될 때까지 기다리는 방법을 설정합니다.
+
+**디바운스 전략:**
+
+-   변경 후 비활동 기간 동안 대기
+-   **디바운스 지연:** 마지막 변경 후 대기 시간 (기본값: 300ms)
+-   **최대 대기 시간:** 대기할 최대 시간 (기본값: 2000ms)
+
+**고정 전략:**
+
+-   변경 후 고정된 시간 동안 대기
+-   **대기 시간:** 고정 지연(밀리초) (기본값: 500ms)
+
+<Tabs>
+  <Tab title="대시보드">
+    **설정 > 개발자 옵션 > 고급 SDK 설정**으로 이동하세요.
+  </Tab>
+  <Tab title="SDK 초기화">
+    ```javascript
+    window.Moss.init({
+      applicationId: 'YOUR_APP_ID',
+      userId: 'USER_ID',
+      stability: {
+        strategy: 'debounce',
+        debounceDelay: 500,
+        maxWaitTime: 3000
+      }
+    })
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+    빈번한 업데이트가 있는 동적 애플리케이션에는 디바운스를 사용하세요. 예측
+    가능한 애플리케이션에는 고정을 사용하세요.
+</Tip>
+
+### 벡터 저장소 설정
+
+RAG(검색 증강 생성)에 사용할 문서 시스템을 선택합니다.
+
+<Note>**구성:** 대시보드 전용</Note>
+
+**기본값:** V1 시스템 (새 애플리케이션용)
+
+**옵션:**
+
+-   **레거시 시스템:** documentation_records 테이블 사용
+-   **V1 시스템 (신규):** 3계층 문서 시스템 사용 (소스, 페이지, 청크)
+
+<Info>
+    V1은 소스, 페이지 및 청크를 통해 더 나은 조직을 제공합니다. 또한 전체 페이지
+    콘텐츠를 보존합니다.
+</Info>
+
+**전환하기 전에:**
+
+-   문서가 새 시스템에 수집되었는지 확인하세요
+-   전환 후 RAG 검색 결과를 테스트하세요
+-   필요한 경우 언제든지 다시 전환할 수 있습니다
+
+### 위험 영역
+
+애플리케이션에 영향을 미치는 되돌릴 수 없는 작업입니다.
+
+<Note>**구성:** 대시보드 전용</Note>
+
+#### 애플리케이션 삭제
+
+애플리케이션 및 모든 관련 데이터를 영구적으로 삭제합니다.
+
+**상태:** 곧 출시
+
+<Danger>
+    활성화되면 이 작업은 세션, 사용자 및 지식 베이스 문서를 포함한 모든 데이터를
+    영구적으로 제거합니다. 이것은 취소할 수 없습니다.
+</Danger>
+
+---
+
+## 전체 SDK 설정 참조
+
+### 사용 가능한 모든 옵션
+
+다음은 모든 SDK 설정 옵션의 전체 참조입니다:
+
+```typescript
+interface MossConfig {
+    // 필수
+    applicationId: string; // 애플리케이션 ID
+    userId: string; // 고유한 사용자 식별자
+
+    // 애플리케이션 기능
+    useVision?: boolean; // 비전/스크린샷 분석 활성화 (기본값: true)
+    language?: "en" | "ko"; // UI 언어 (undefined = 자동 감지)
+
+    // 기록 및 히스토리
+    enableSessionRecording?: boolean; // 세션 기록 (기본값: true)
+    enableScreenHistoryRecording?: boolean; // AI 컨텍스트에 히스토리 포함 (기본값: true)
+
+    // 플래닝 설정
+    planning?: {
+        enabled?: boolean; // 플래닝 기능 활성화 (기본값: false)
+        maxSteps?: number; // 최대 계획 단계 (기본값: 10)
+        allowUserSkip?: boolean; // 단계 건너뛰기 허용 (기본값: true)
+        showPlanOverview?: boolean; // 실행 전 계획 표시 (기본값: true)
+    };
+
+    // 세션 관리
+    sessionConfig?: {
+        inactivityTimeout?: number; // 타임아웃 전 분 (기본값: 30)
+        maxSessionAge?: number; // 만료 전 시간 (기본값: 2)
+        showNotification?: boolean; // 세션 알림 표시 (기본값: true)
+    };
+
+    // 기술 설정 (개발자 옵션)
+    logLevel?: "ERROR" | "WARN" | "INFO" | "DEBUG"; // 로깅 수준 (기본값: 'INFO')
+    debugMode?: boolean; // 디버그 모드 활성화 (기본값: false)
+    screenshotMode?: "fullpage" | "viewport"; // 스크린샷 캡처 모드 (기본값: 'fullpage')
+    observeTargetSelector?: string; // DOM 관찰 타겟 (기본값: 'body')
+
+    // DOM 안정성
+    stability?: {
+        strategy: "debounce" | "fixed";
+        debounceDelay?: number; // 디바운스 전략용 (기본값: 300ms)
+        maxWaitTime?: number; // 디바운스의 최대 대기 시간 (기본값: 2000ms)
+        waitTime?: number; // 고정 전략용 (기본값: 500ms)
+    };
+}
+```
+
+<Warning>
+    **SDK를 통해 설정 불가:** AI 어시스턴트 지침, API 키, 벡터 저장소 설정,
+    도메인 액세스 제어 및 위험 영역 작업은 대시보드를 통해 설정해야 합니다.
+</Warning>
+
+### 설정 예시
+
+<CodeGroup>
+
+```javascript 최소 설정
+window.Moss.init({
+    applicationId: "YOUR_APP_ID",
+    userId: "USER_ID",
+});
+```
+
+```javascript 파워 유저 설정
+window.Moss.init({
+    applicationId: "YOUR_APP_ID",
+    userId: "premium-user-123",
+
+    // 모든 기능 활성화
+    useVision: true,
+    enableSessionRecording: true,
+    enableScreenHistoryRecording: true,
+    language: "ko",
+
+    // 고급 플래닝
+    planning: {
+        enabled: true,
+        maxSteps: 15,
+        allowUserSkip: true,
+        showPlanOverview: true,
+    },
+
+    // 프리미엄 사용자를 위한 확장 세션
+    sessionConfig: {
+        inactivityTimeout: 60,
+        maxSessionAge: 4,
+        showNotification: true,
+    },
+});
+```
+
+```javascript 개발자/디버그 설정
+window.Moss.init({
+    applicationId: "YOUR_APP_ID",
+    userId: "dev-user",
+
+    // 디버그 설정
+    debugMode: true,
+    logLevel: "DEBUG",
+
+    // 테스트를 위한 빠른 안정성
+    stability: {
+        strategy: "fixed",
+        waitTime: 100,
+    },
+
+    // 더 빠른 테스트를 위한 뷰포트 스크린샷
+    screenshotMode: "viewport",
+});
+```
+
+```javascript 개인정보 중심 설정
+window.Moss.init({
+    applicationId: "YOUR_APP_ID",
+    userId: "privacy-user-456",
+
+    // 최소 데이터 수집
+    enableSessionRecording: false,
+    enableScreenHistoryRecording: false,
+    useVision: true, // 여전히 유용하지만 덜 침습적
+
+    // 짧은 세션
+    sessionConfig: {
+        inactivityTimeout: 15,
+        maxSessionAge: 1,
+    },
+});
+```
+
+</CodeGroup>
+
+---
+
+## 설정 모범 사례
+
+### 대시보드 vs SDK 설정
+
+**대시보드 설정 사용 시기:**
+
+-   애플리케이션 전체 기본값 설정
+-   보안 정책 구성 (허용된 도메인, API 키)
+-   애플리케이션 식별 및 메타데이터 관리
+-   모든 사용자에게 적용되는 AI 지침 설정
+-   문서/벡터 저장소 구성 관리
+
+**SDK 초기화 사용 시기:**
+
+-   사용자별 사용자 정의가 필요한 경우
+-   설정이 런타임 조건에 따라 달라지는 경우
+-   다른 환경에 다른 설정이 필요한 경우
+-   기존 사용자 기본 설정과 통합하는 경우
+-   기술적인 디버깅 및 개발 설정
+
+**런타임 설정 사용 시기:**
+
+-   사용자 작업에 응답하는 경우 (개인정보 보호 모드 토글)
+-   네트워크 조건에 맞게 조정하는 경우
+-   기능 플래그 또는 A/B 테스트
+-   세션별 재정의
+
+### 성능 고려사항
+
+1. **스크린샷 모드**: 매우 긴 페이지가 있는 앱의 경우 처리 시간을 줄이기 위해 `viewport` 모드 사용
+2. **안정성 전략**:
+    - 매우 동적인 앱 (빈번한 업데이트가 있는 SPA)의 경우 `debounce` 사용
+    - 제어된 업데이트가 있는 예측 가능한 앱의 경우 `fixed` 사용
+3. **세션 기록**: 개인정보 보호가 민감한 페이지 또는 사용자의 경우 비활성화
+4. **로그 레벨**: 오버헤드를 줄이기 위해 프로덕션에서 `WARN` 또는 `ERROR` 사용
+
+### 보안 모범 사례
+
+1. **API 키를 노출하지 마세요** 클라이언트 측 코드에서
+2. **도메인 제한 사용** 무단 사용 방지
+3. **사용자 동의 구현** 세션 기록에 대해
+4. **userId 정리** PII 노출 방지
+5. **세션 기록 검토** 공유하기 전에 민감한 데이터 확인
+
+---
+
+## 도움이 필요하신가요?
+
+설정이나 구성에 대해 도움이 필요하시면 지원팀에 문의하거나 특정 기능에 대한 다른 문서 페이지를 참조하세요.
