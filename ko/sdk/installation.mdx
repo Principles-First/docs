@@ -1,0 +1,250 @@
+---
+title: "설치"
+description: "NPM 또는 CDN 스크립트 태그를 통한 Moss SDK 설치"
+icon: "download"
+---
+
+# 설치
+
+애플리케이션에 맞는 통합 방법을 선택하세요.
+
+<Info>
+    [Moss 대시보드](https://dashboard.viamoss.ai)에서 **애플리케이션 ID**가 필요합니다. JWT 서명 키도 필요합니다 — [인증](/ko/sdk/authentication)을 참조하세요.
+</Info>
+
+## NPM 패키지 (React)
+
+React 17+ 애플리케이션용입니다.
+
+### 설치
+
+```bash
+npm install @viamoss/moss-sdk
+```
+
+### 기본 설정
+
+앱에 `AgentProvider`와 `AssistantButton`을 추가하세요. 프로바이더가 전체 애플리케이션을 감쌀 **필요가 없습니다** — Moss 컴포넌트만 감싸면 됩니다.
+
+```tsx App.tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
+function App() {
+  return (
+    <>
+      <YourApp />
+      <AgentProvider config={{
+        apiUrl: 'https://clippy-api.viamoss.ai',
+        applicationId: 'YOUR_APP_ID',
+        userId: currentUser.id,
+        getJwt: () => fetchMossToken(),
+      }}>
+        <AssistantButton />
+      </AgentProvider>
+    </>
+  );
+}
+```
+
+<Tip>
+    `AgentProvider`는 Moss UI 컴포넌트(`AssistantButton`)만 감싸면 됩니다. React 트리에서의 위치와 관계없이 전체 페이지 DOM을 관찰합니다.
+</Tip>
+
+### 피어 디펜던시
+
+SDK는 React 17 또는 18을 피어 디펜던시로 요구합니다:
+
+```json
+{
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  }
+}
+```
+
+---
+
+## CDN 스크립트 태그
+
+프레임워크에 관계없이 모든 웹 애플리케이션에서 사용할 수 있습니다.
+
+### 기본 설정
+
+HTML에 스크립트 태그를 추가하세요. SDK가 자동으로 초기화되고 어시스턴트 버튼을 렌더링합니다.
+
+```html
+<script
+  src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID"
+  data-api-base="https://clippy-api.viamoss.ai"
+></script>
+```
+
+### JavaScript를 통한 설정
+
+더 세밀한 제어를 위해 스크립트 로드 전에 `window.mossSettings`를 통해 설정하세요:
+
+```html
+<script>
+  window.mossSettings = {
+    apiUrl: 'https://clippy-api.viamoss.ai',
+    userId: 'user-123',
+    jwt: 'YOUR_JWT_TOKEN',
+    language: 'ko',
+  };
+</script>
+<script src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID"></script>
+```
+
+### 글로벌 API
+
+초기화 후 글로벌 `window.MossSDK` 객체를 사용할 수 있습니다:
+
+```javascript
+// 새 설정으로 재초기화
+await window.MossSDK.boot({ userId: 'new-user' });
+
+// 사용자 ID 업데이트 (재초기화 트리거)
+window.MossSDK.identify('user-456', { plan: 'premium' });
+
+// 런타임 설정 업데이트
+window.MossSDK.updateConfig({ language: 'en' });
+
+// 완전히 해제
+window.MossSDK.shutdown();
+```
+
+---
+
+## 프레임워크별 예시
+
+<Tabs>
+  <Tab title="Next.js (App Router)">
+    ```tsx app/layout.tsx
+    import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+    import { auth } from '@/lib/auth';
+
+    export default async function RootLayout({ children }) {
+      const session = await auth();
+
+      return (
+        <html>
+          <body>
+            {children}
+            <MossAssistant userId={session.user.id} />
+          </body>
+        </html>
+      );
+    }
+
+    // Moss용 클라이언트 컴포넌트
+    'use client';
+    function MossAssistant({ userId }: { userId: string }) {
+      return (
+        <AgentProvider config={{
+          apiUrl: 'https://clippy-api.viamoss.ai',
+          applicationId: 'YOUR_APP_ID',
+          userId,
+          getJwt: () => fetch('/api/moss-token').then(r => r.json()).then(d => d.token),
+        }}>
+          <AssistantButton />
+        </AgentProvider>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Next.js (스크립트 태그)">
+    ```tsx app/layout.tsx
+    import Script from 'next/script';
+
+    export default function RootLayout({ children }) {
+      return (
+        <html>
+          <body>
+            {children}
+            <Script
+              src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID"
+              data-api-base="https://clippy-api.viamoss.ai"
+              strategy="lazyOnload"
+            />
+          </body>
+        </html>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Vue.js">
+    ```vue App.vue
+    <script setup>
+    import { onMounted, onUnmounted } from 'vue';
+
+    let script = null;
+
+    onMounted(() => {
+      window.mossSettings = {
+        apiUrl: 'https://clippy-api.viamoss.ai',
+        userId: 'USER_ID',
+        jwt: 'YOUR_JWT_TOKEN',
+      };
+
+      script = document.createElement('script');
+      script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID';
+      script.async = true;
+      document.head.appendChild(script);
+    });
+
+    onUnmounted(() => {
+      if (script && document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    });
+    </script>
+    ```
+  </Tab>
+
+  <Tab title="Angular">
+    ```typescript app.component.ts
+    import { Component, OnInit, OnDestroy } from '@angular/core';
+
+    @Component({
+      selector: 'app-root',
+      templateUrl: './app.component.html',
+    })
+    export class AppComponent implements OnInit, OnDestroy {
+      private script: HTMLScriptElement | null = null;
+
+      ngOnInit() {
+        (window as any).mossSettings = {
+          apiUrl: 'https://clippy-api.viamoss.ai',
+          userId: 'USER_ID',
+          jwt: 'YOUR_JWT_TOKEN',
+        };
+
+        this.script = document.createElement('script');
+        this.script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID';
+        this.script.async = true;
+        document.head.appendChild(this.script);
+      }
+
+      ngOnDestroy() {
+        if (this.script && document.head.contains(this.script)) {
+          document.head.removeChild(this.script);
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## 다음 단계
+
+<CardGroup cols={2}>
+    <Card title="인증" icon="lock" href="/ko/sdk/authentication">
+        JWT 토큰 인증 설정
+    </Card>
+    <Card title="설정" icon="gear" href="/ko/sdk/configuration">
+        SDK 동작 및 옵션 설정
+    </Card>
+</CardGroup>

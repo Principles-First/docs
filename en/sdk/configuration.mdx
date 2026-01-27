@@ -1,0 +1,194 @@
+---
+title: "Configuration"
+description: "Full SDK configuration reference"
+icon: "gear"
+---
+
+# Configuration
+
+All SDK options and their defaults.
+
+## Required Fields
+
+Every SDK initialization requires these fields:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',   // Moss backend URL
+  applicationId: 'YOUR_APP_ID',               // From the Dashboard
+  userId: 'user-123',                          // Your user's identifier
+  getJwt: () => fetchMossToken(),              // JWT token provider
+}}>
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `apiUrl` | `string` | Moss backend API URL |
+| `applicationId` | `string` | Application UUID from the Dashboard |
+| `userId` | `string` | Unique identifier for the current user |
+| `getJwt` | `() => Promise<string>` | Function that returns a fresh JWT token |
+
+<Info>
+    You can provide `applicationName` instead of `applicationId` if preferred. At least one is required.
+</Info>
+
+## Common Options
+
+Options you'll likely want to configure.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `language` | `'en' \| 'ko'` | Auto-detect | UI language |
+| `debugMode` | `boolean` | `false` | Enable debug logging and UI |
+| `screenshotMode` | `'fullpage' \| 'viewport'` | `'fullpage'` | Screenshot capture mode |
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'user-123',
+  getJwt: () => fetchMossToken(),
+  language: 'en',
+  debugMode: false,
+  screenshotMode: 'fullpage',
+}}>
+```
+
+## All Options
+
+### Authentication
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `getJwt` | `() => Promise<string>` | — | Function to fetch fresh JWT (recommended) |
+| `jwt` | `string` | — | Static JWT token (no auto-refresh) |
+| `apiKey` | `string` | — | **Deprecated.** Use JWT instead |
+
+### Display
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `language` | `'en' \| 'ko'` | Auto-detect | UI language |
+| `screenshotMode` | `'fullpage' \| 'viewport'` | `'fullpage'` | How screenshots are captured |
+
+### Behavior
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `useVision` | `boolean` | Backend setting | Override vision (screenshot analysis) |
+| `observeTargetSelector` | `string` | `'body'` | CSS selector for DOM observation scope |
+| `pageSanitizationScript` | `(doc: Document) => void` | — | Clean the DOM before context capture |
+| `enableSessionRecording` | `boolean` | `true` | Upload session recordings to dashboard |
+| `enableScreenHistoryRecording` | `boolean` | `true` | Include screen history in AI context |
+
+### Session Management
+
+```tsx
+sessionConfig: {
+  inactivityTimeout: 30,    // Minutes before new session (default: 30)
+  maxSessionAge: 2,         // Hours before forcing new session (default: 2)
+  showNotification: true,   // Notify when auto-starting session (default: true)
+}
+```
+
+### Debug
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `logLevel` | `LogLevel` | `INFO` | Logging verbosity: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `debugMode` | `boolean` | `false` | Enable debug UI and verbose logging |
+
+### Stability
+
+The SDK waits for the page to stabilize before capturing context. This is configured via the `stability` field. See [Advanced > Stability Tuning](/en/sdk/advanced#stability-tuning) for details.
+
+```tsx
+stability: {
+  layers: {
+    networkIdle: true,        // Wait for network requests (default: true)
+    domMutations: true,       // Wait for DOM to stop changing (default: true)
+    loadingIndicators: false, // Wait for spinners/skeletons (default: false)
+    layoutShift: false,       // Wait for layout shifts (default: false)
+    browserIdle: true,        // Wait for browser idle (default: true)
+    finalFrame: true,         // Wait for animation frame (default: true)
+  },
+}
+```
+
+---
+
+## Full TypeScript Interface
+
+```typescript
+interface MossSDKConfig {
+  // Required
+  apiUrl: string;
+  userId: string;
+  applicationId?: string;     // At least one of applicationId
+  applicationName?: string;   // or applicationName is required
+
+  // Authentication
+  getJwt?: () => Promise<string>;   // Recommended
+  jwt?: string;
+  /** @deprecated Use getJwt instead */
+  apiKey?: string;
+
+  // Display
+  language?: 'en' | 'ko';
+  screenshotMode?: 'fullpage' | 'viewport';
+
+  // Behavior
+  useVision?: boolean;
+  observeTargetSelector?: string;
+  pageSanitizationScript?: (document: Document) => void;
+  enableSessionRecording?: boolean;
+  enableScreenHistoryRecording?: boolean;
+
+  // Session
+  sessionConfig?: {
+    inactivityTimeout?: number;
+    maxSessionAge?: number;
+    showNotification?: boolean;
+  };
+
+  // Debug
+  logLevel?: LogLevel;
+  debugMode?: boolean;
+
+  // Stability
+  stability?: StabilityConfig;
+}
+```
+
+---
+
+## AssistantButton Props
+
+The `AssistantButton` component accepts optional props for customization:
+
+```tsx
+<AssistantButton
+  iconVariant="question"        // 'default' (Moss logo) or 'question' (? icon)
+  iconUrl="/custom-icon.svg"    // Custom icon URL (overrides iconVariant)
+  position={{ bottom: 20, right: 80 }}  // Button position in pixels
+  onButtonClick={() => {}}      // Callback when button is clicked
+/>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `iconVariant` | `'default' \| 'question'` | `'question'` | Built-in icon style |
+| `iconUrl` | `string` | — | Custom icon image URL |
+| `position` | `{ bottom?, right?, top?, left? }` | `{ bottom: 20, right: 80 }` | Button position |
+| `onButtonClick` | `() => void` | — | Click callback |
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card title="Advanced" icon="sliders" href="/en/sdk/advanced">
+        Stability tuning, Shadow DOM, CSP headers
+    </Card>
+    <Card title="Settings Reference" icon="list" href="/en/configurations/settings-reference">
+        Dashboard configuration options
+    </Card>
+</CardGroup>

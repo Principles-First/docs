@@ -33,6 +33,16 @@
             ]
           },
           {
+            "group": "SDK",
+            "pages": [
+              "en/sdk/overview",
+              "en/sdk/installation",
+              "en/sdk/authentication",
+              "en/sdk/configuration",
+              "en/sdk/advanced"
+            ]
+          },
+          {
             "group": "Configuration",
             "pages": [
               "en/quickstart",
@@ -48,6 +58,16 @@
             "group": "시작하기",
             "pages": [
               "ko/index"
+            ]
+          },
+          {
+            "group": "SDK",
+            "pages": [
+              "ko/sdk/overview",
+              "ko/sdk/installation",
+              "ko/sdk/authentication",
+              "ko/sdk/configuration",
+              "ko/sdk/advanced"
             ]
           },
           {

@@ -1,0 +1,55 @@
+---
+title: "SDK Overview"
+description: "How the Moss SDK works and what it provides"
+icon: "cube"
+---
+
+# SDK Overview
+
+The Moss SDK embeds an AI-powered assistant into your web application. It captures page context, communicates with the Moss backend, and renders an interactive assistant UI — all without affecting your existing styles or layout.
+
+## How It Works
+
+When a user asks a question, the SDK:
+
+1. **Captures page context** — DOM structure, visible text, and an optional screenshot
+2. **Sends it to the Moss backend** — along with the user's message and conversation history
+3. **Receives AI-generated guidance** — which may include text responses or step-by-step instructions
+4. **Renders the response** — in a chat modal with optional element highlighting and coach marks
+
+The entire UI renders inside a [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM), so Moss styles never conflict with your application's CSS.
+
+## Integration Methods
+
+The SDK supports two integration methods:
+
+| Method | Best For | Install |
+|--------|----------|---------|
+| **NPM Package** | React applications | `npm install @viamoss/moss-sdk` |
+| **CDN Script Tag** | Any web application | `<script src="...">` |
+
+Both methods provide the same assistant UI and functionality. Choose based on your tech stack.
+
+## What Gets Captured
+
+When the assistant needs context about the current page, the SDK captures:
+
+- **Visible text content** from the DOM
+- **Interactive elements** (buttons, links, form fields) with their labels and states
+- **A screenshot** of the page (configurable: full page or viewport only)
+- **Page URL and metadata**
+
+<Info>
+    All data is sent over HTTPS to your configured Moss backend. No data is stored in the browser beyond the current session.
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card title="Installation" icon="download" href="/en/sdk/installation">
+        Install the SDK via NPM or CDN
+    </Card>
+    <Card title="Authentication" icon="lock" href="/en/sdk/authentication">
+        Set up JWT authentication
+    </Card>
+</CardGroup>
