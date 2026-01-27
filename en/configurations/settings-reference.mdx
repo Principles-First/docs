@@ -549,20 +549,11 @@ Useful for troubleshooting SDK integration issues.
   </Tab>
 </Tabs>
 
-#### DOM Stability Strategy
+#### DOM Stability
 
-Configure how the SDK waits for DOM changes to stabilize before taking screenshots.
+Configure how the SDK waits for the page to stabilize before capturing context. The SDK runs multiple detection layers in sequence (network idle, DOM mutations, browser idle, etc.) and each layer can be individually enabled or disabled.
 
-**Debounce Strategy:**
-
--   Waits for a period of inactivity after changes
--   **Debounce Delay:** Time to wait after last change (default: 300ms)
--   **Max Wait Time:** Maximum time to wait (default: 2000ms)
-
-**Fixed Strategy:**
-
--   Waits a fixed amount of time after any change
--   **Wait Time:** Fixed delay in milliseconds (default: 500ms)
+**Default:** Network idle, DOM mutations, browser idle, and final frame layers enabled. Loading indicators and layout shift layers disabled.
 
 <Tabs>
   <Tab title="Dashboard">
@@ -574,9 +565,12 @@ Configure how the SDK waits for DOM changes to stabilize before taking screensho
       applicationId: 'YOUR_APP_ID',
       userId: 'USER_ID',
       stability: {
-        strategy: 'debounce',
-        debounceDelay: 500,
-        maxWaitTime: 3000
+        layers: {
+          loadingIndicators: true, // Enable loading indicator detection
+        },
+        domMutations: {
+          quietPeriodMs: 1000, // Wait 1s of DOM quiet (default: 800ms)
+        },
       }
     })
     ```
@@ -584,8 +578,7 @@ Configure how the SDK waits for DOM changes to stabilize before taking screensho
 </Tabs>
 
 <Tip>
-    Use debounce for dynamic applications with frequent updates. Use fixed for
-    predictable applications.
+    See the [SDK Advanced Configuration](/en/sdk/advanced#stability-tuning) guide for full layer-by-layer documentation.
 </Tip>
 
 ### Vector Store Configuration
@@ -672,12 +665,17 @@ interface MossConfig {
     screenshotMode?: "fullpage" | "viewport"; // Screenshot capture mode (default: 'fullpage')
     observeTargetSelector?: string; // DOM observation target (default: 'body')
 
-    // DOM Stability
+    // DOM Stability (see SDK Advanced docs for full reference)
     stability?: {
-        strategy: "debounce" | "fixed";
-        debounceDelay?: number; // For debounce strategy (default: 300ms)
-        maxWaitTime?: number; // Max wait for debounce (default: 2000ms)
-        waitTime?: number; // For fixed strategy (default: 500ms)
+        maxTotalWaitMs?: number; // Max total wait (default: 15000ms)
+        layers?: {
+            networkIdle?: boolean; // default: true
+            domMutations?: boolean; // default: true
+            loadingIndicators?: boolean; // default: false
+            layoutShift?: boolean; // default: false
+            browserIdle?: boolean; // default: true
+            finalFrame?: boolean; // default: true
+        };
     };
 }
 ```
@@ -736,10 +734,12 @@ window.Moss.init({
     debugMode: true,
     logLevel: "DEBUG",
 
-    // Fast stability for testing
+    // Minimal stability checks for fast testing
     stability: {
-        strategy: "fixed",
-        waitTime: 100,
+        layers: {
+            networkIdle: false,
+            browserIdle: false,
+        },
     },
 
     // Viewport screenshots for faster testing
@@ -799,9 +799,7 @@ window.Moss.init({
 ### Performance Considerations
 
 1. **Screenshot Mode**: Use `viewport` mode if your app has very long pages to reduce processing time
-2. **Stability Strategy**:
-    - Use `debounce` for highly dynamic apps (SPAs with frequent updates)
-    - Use `fixed` for predictable apps with controlled updates
+2. **Stability Layers**: Disable `loadingIndicators` and `layoutShift` layers (the defaults) unless your app uses skeleton screens that reliably disappear
 3. **Session Recording**: Disable for privacy-sensitive pages or users
 4. **Log Level**: Use `WARN` or `ERROR` in production to reduce overhead
 

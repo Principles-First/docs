@@ -1,0 +1,223 @@
+---
+title: "고급"
+description: "안정성 튜닝, Shadow DOM, CSP 및 문제 해결"
+icon: "sliders"
+---
+
+# 고급 설정
+
+## 안정성 튜닝
+
+페이지 컨텍스트를 캡처하기 전에 SDK는 페이지가 안정화될 때까지 대기합니다. 이를 통해 불완전하거나 렌더링 중인 스냅샷이 AI에 전송되는 것을 방지합니다. 안정성 시스템은 6개의 감지 레이어를 순차적으로 실행합니다:
+
+| 레이어 | 감지 대상 | 기본값 |
+|--------|----------|--------|
+| **Network Idle** | 대기 중인 fetch/XHR 요청 | 활성화 |
+| **DOM Mutations** | DOM 변경 (MutationObserver 사용) | 활성화 |
+| **Loading Indicators** | 스피너, 스켈레톤, `[aria-busy]` | 비활성화 |
+| **Layout Shifts** | 시각적 레이아웃 변경 (PerformanceObserver 사용) | 비활성화 |
+| **Browser Idle** | CPU 유휴 (requestIdleCallback 사용) | 활성화 |
+| **Final Frame** | requestAnimationFrame 1회 | 활성화 |
+
+<Info>
+    로딩 인디케이터와 레이아웃 시프트 레이어는 기본적으로 비활성화되어 있습니다. 많은 사이트에 지속적인 로딩 애니메이션이 있어 불필요한 지연을 유발할 수 있기 때문입니다. 애플리케이션이 확실히 사라지는 스켈레톤 스크린을 사용하는 경우 활성화하세요.
+</Info>
+
+### 추가 레이어 활성화
+
+```tsx
+<AgentProvider config={{
+  // ...
+  stability: {
+    layers: {
+      loadingIndicators: true,  // 로딩 인디케이터 감지 활성화
+      layoutShift: true,        // 레이아웃 시프트 감지 활성화
+    },
+  },
+}}>
+```
+
+### 레이어별 설정
+
+각 레이어를 개별적으로 설정할 수 있습니다:
+
+```tsx
+stability: {
+  // 글로벌 타임아웃
+  maxTotalWaitMs: 15000,       // 모든 레이어의 최대 총 대기 시간 (기본값: 15초)
+  networkTimeoutMs: 10000,     // 네트워크 유휴 타임아웃 (기본값: 10초)
+  browserIdleTimeoutMs: 500,   // 브라우저 유휴 타임아웃 (기본값: 500ms)
+
+  // DOM 뮤테이션 레이어
+  domMutations: {
+    quietPeriodMs: 800,        // 이 시간 동안 변경 없음 = 안정 (기본값: 800ms)
+    excludeSelectors: ['.live-clock', '.notification-badge'],
+  },
+
+  // 로딩 인디케이터 레이어 (layers.loadingIndicators도 활성화해야 함)
+  loadingIndicators: {
+    selectors: ['[class*="skeleton"]', '.spinner', '[aria-busy="true"]'],
+    excludeSelectors: ['.permanent-loader'],
+    timeoutMs: 5000,
+  },
+
+  // 레이아웃 시프트 레이어 (layers.layoutShift도 활성화해야 함)
+  layoutShift: {
+    quietPeriodMs: 200,        // 이 시간 동안 시프트 없음 = 안정 (기본값: 200ms)
+    ignoreThreshold: 0.01,     // 작은 시프트 무시 (기본값: 0.01)
+  },
+}
+```
+
+### 안정성 검사 비활성화
+
+테스트용이나 매우 단순한 페이지의 경우 레이어를 비활성화할 수 있습니다:
+
+```tsx
+stability: {
+  layers: {
+    networkIdle: false,
+    domMutations: false,
+    browserIdle: false,
+    finalFrame: false,
+  },
+}
+```
+
+<Warning>
+    안정성 레이어를 비활성화하면 AI가 불완전한 페이지 컨텍스트를 받을 수 있습니다. 테스트 용도이거나 페이지가 완전히 렌더링되었다고 확신하는 경우에만 비활성화하세요.
+</Warning>
+
+### 리로드 후 처리
+
+가이드 단계 중에 전체 페이지 리로드가 발생하는 경우 `afterReload` 옵션을 활성화하여 상태를 보존하세요:
+
+```tsx
+stability: {
+  afterReload: {
+    enabled: true,
+    waitMs: 1000,           // 리로드 후 캡처까지 대기 (기본값: 1000ms)
+    pendingTTL: 30000,      // 스토리지에 대기 상태 유지 (기본값: 30초)
+  },
+}
+```
+
+---
+
+## Shadow DOM
+
+SDK는 모든 UI를 `document.body`에 첨부된 Shadow DOM 내부에 렌더링합니다. 이는 다음을 의미합니다:
+
+- **여러분의 CSS가 Moss UI에 영향을 줄 수 없습니다** — 스타일이 완전히 캡슐화됨
+- **Moss CSS가 여러분의 앱에 영향을 줄 수 없습니다** — 스타일 누출 없음
+- **여러분의 앱에서 DOM 쿼리로 Moss 요소를 찾을 수 없습니다** — `document.querySelector`가 Shadow Root 내부의 요소를 매칭하지 않음
+
+<Tip>
+    자동화된 테스트 도구(Cypress, Playwright 등)를 사용하는 경우 Moss 요소와 상호 작용하려면 Shadow DOM을 관통해야 합니다. `#moss-sdk-shadow-root` 호스트 요소를 찾으세요.
+</Tip>
+
+---
+
+## Content Security Policy (CSP)
+
+애플리케이션에서 엄격한 CSP 헤더를 사용하는 경우 다음을 허용해야 할 수 있습니다:
+
+| 디렉티브 | 값 | 이유 |
+|----------|---|------|
+| `connect-src` | Moss 백엔드 URL | API 요청 |
+| `script-src` | CDN URL (스크립트 태그 사용 시) | SDK 스크립트 |
+| `style-src` | `'unsafe-inline'` | Shadow DOM 스타일 |
+| `img-src` | `blob:` `data:` | 스크린샷 처리 |
+
+CSP 헤더 예시:
+
+```
+Content-Security-Policy:
+  connect-src 'self' https://clippy-api.viamoss.ai;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' blob: data:;
+```
+
+---
+
+## DOM 관찰 범위
+
+기본적으로 SDK는 `document.body`의 변경을 관찰합니다. 페이지의 특정 부분으로 관찰을 제한하려면:
+
+```tsx
+<AgentProvider config={{
+  // ...
+  observeTargetSelector: '#main-content',
+}}>
+```
+
+다음과 같은 경우에 유용합니다:
+- 앱에 재캡처를 트리거하지 말아야 할 복잡한 사이드바나 헤더가 있는 경우
+- 관련 없는 DOM 변경으로 인한 노이즈를 줄이고 싶은 경우
+- 어시스턴트가 페이지의 특정 섹션만 도와야 하는 경우
+
+---
+
+## 페이지 정리
+
+SDK가 컨텍스트를 캡처하기 전에 DOM에서 민감한 콘텐츠를 제거하세요:
+
+```tsx
+<AgentProvider config={{
+  // ...
+  pageSanitizationScript: (doc) => {
+    // 신용카드 필드 제거
+    doc.querySelectorAll('[data-sensitive]').forEach(el => {
+      el.textContent = '[편집됨]';
+    });
+    // 트래킹 픽셀 제거
+    doc.querySelectorAll('img[width="1"]').forEach(el => el.remove());
+  },
+}}>
+```
+
+<Warning>
+    정리 함수는 복제된 문서에서 실행됩니다. 사용자에게는 아무런 변경이 보이지 않습니다 — AI가 보는 내용에만 영향을 줍니다.
+</Warning>
+
+---
+
+## 문제 해결
+
+### 어시스턴트 버튼이 나타나지 않음
+
+1. 브라우저 콘솔에서 `[MossSDK]` 오류를 확인하세요
+2. `applicationId`가 대시보드의 유효한 애플리케이션과 일치하는지 확인하세요
+3. `apiUrl`이 브라우저에서 접근 가능한지 확인하세요
+4. JWT 서명 키가 활성 상태이고 폐기되지 않았는지 확인하세요
+
+### "Failed to fetch config" 오류
+
+- SDK가 백엔드에 연결할 수 없습니다. `apiUrl` 및 네트워크/CORS 설정을 확인하세요.
+- CSP를 사용하는 경우 `connect-src`에 백엔드 URL이 포함되어 있는지 확인하세요.
+
+### 스크린샷이 빈 화면이거나 불완전함
+
+- `screenshotMode`를 `'viewport'`로 전환해 보세요
+- 페이지에 느린 애니메이션이 있는 경우 `stability.domMutations.quietPeriodMs`를 늘리세요
+- iframe이나 교차 출처 콘텐츠가 캡처를 차단하고 있는지 확인하세요
+
+### 호스트 애플리케이션과 스타일 충돌
+
+이것은 발생하지 않아야 합니다 — SDK는 Shadow DOM 격리를 사용합니다. 충돌이 보이는 경우:
+- 앱에서 `*` 또는 `body` 선택자에 `!important`를 사용하고 있는지 확인하세요
+- JavaScript가 Shadow Root를 수정하고 있지 않은지 확인하세요
+
+### 디버그 모드
+
+문제 진단을 위해 상세 로깅을 활성화하세요:
+
+```tsx
+<AgentProvider config={{
+  // ...
+  debugMode: true,
+  logLevel: 'DEBUG',  // 또는 import { LogLevel } from '@viamoss/moss-sdk'
+}}>
+```
+
+안정성 레이어 타이밍, 네트워크 요청, 컨텍스트 캡처 세부 정보 및 API 응답이 브라우저 콘솔에 기록됩니다.

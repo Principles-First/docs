@@ -1,0 +1,194 @@
+---
+title: "설정"
+description: "전체 SDK 설정 참조"
+icon: "gear"
+---
+
+# 설정
+
+모든 SDK 옵션과 기본값입니다.
+
+## 필수 필드
+
+모든 SDK 초기화에는 다음 필드가 필요합니다:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',   // Moss 백엔드 URL
+  applicationId: 'YOUR_APP_ID',               // 대시보드에서 확인
+  userId: 'user-123',                          // 현재 사용자의 식별자
+  getJwt: () => fetchMossToken(),              // JWT 토큰 제공 함수
+}}>
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `apiUrl` | `string` | Moss 백엔드 API URL |
+| `applicationId` | `string` | 대시보드의 애플리케이션 UUID |
+| `userId` | `string` | 현재 사용자의 고유 식별자 |
+| `getJwt` | `() => Promise<string>` | 새 JWT 토큰을 반환하는 함수 |
+
+<Info>
+    `applicationId` 대신 `applicationName`을 제공할 수도 있습니다. 둘 중 하나는 필수입니다.
+</Info>
+
+## 일반 옵션
+
+설정할 가능성이 높은 옵션입니다.
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `language` | `'en' \| 'ko'` | 자동 감지 | UI 언어 |
+| `debugMode` | `boolean` | `false` | 디버그 로깅 및 UI 활성화 |
+| `screenshotMode` | `'fullpage' \| 'viewport'` | `'fullpage'` | 스크린샷 캡처 모드 |
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'user-123',
+  getJwt: () => fetchMossToken(),
+  language: 'ko',
+  debugMode: false,
+  screenshotMode: 'fullpage',
+}}>
+```
+
+## 전체 옵션
+
+### 인증
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `getJwt` | `() => Promise<string>` | — | 새 JWT를 가져오는 함수 (권장) |
+| `jwt` | `string` | — | 고정 JWT 토큰 (자동 갱신 없음) |
+| `apiKey` | `string` | — | **더 이상 사용되지 않음.** JWT를 사용하세요 |
+
+### 표시
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `language` | `'en' \| 'ko'` | 자동 감지 | UI 언어 |
+| `screenshotMode` | `'fullpage' \| 'viewport'` | `'fullpage'` | 스크린샷 캡처 방식 |
+
+### 동작
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `useVision` | `boolean` | 백엔드 설정 | 비전(스크린샷 분석) 재정의 |
+| `observeTargetSelector` | `string` | `'body'` | DOM 관찰 범위의 CSS 선택자 |
+| `pageSanitizationScript` | `(doc: Document) => void` | — | 컨텍스트 캡처 전 DOM 정리 |
+| `enableSessionRecording` | `boolean` | `true` | 대시보드에 세션 기록 업로드 |
+| `enableScreenHistoryRecording` | `boolean` | `true` | AI 컨텍스트에 화면 히스토리 포함 |
+
+### 세션 관리
+
+```tsx
+sessionConfig: {
+  inactivityTimeout: 30,    // 새 세션까지의 비활동 시간(분) (기본값: 30)
+  maxSessionAge: 2,         // 강제 새 세션까지의 시간 (기본값: 2)
+  showNotification: true,   // 자동 세션 시작 시 알림 (기본값: true)
+}
+```
+
+### 디버그
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `logLevel` | `LogLevel` | `INFO` | 로깅 상세도: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `debugMode` | `boolean` | `false` | 디버그 UI 및 상세 로깅 활성화 |
+
+### 안정성
+
+SDK는 컨텍스트를 캡처하기 전에 페이지가 안정화될 때까지 대기합니다. `stability` 필드를 통해 설정합니다. 자세한 내용은 [고급 > 안정성 튜닝](/ko/sdk/advanced#안정성-튜닝)을 참조하세요.
+
+```tsx
+stability: {
+  layers: {
+    networkIdle: true,        // 네트워크 요청 완료 대기 (기본값: true)
+    domMutations: true,       // DOM 변경 중지 대기 (기본값: true)
+    loadingIndicators: false, // 스피너/스켈레톤 대기 (기본값: false)
+    layoutShift: false,       // 레이아웃 변경 대기 (기본값: false)
+    browserIdle: true,        // 브라우저 유휴 대기 (기본값: true)
+    finalFrame: true,         // 애니메이션 프레임 대기 (기본값: true)
+  },
+}
+```
+
+---
+
+## 전체 TypeScript 인터페이스
+
+```typescript
+interface MossSDKConfig {
+  // 필수
+  apiUrl: string;
+  userId: string;
+  applicationId?: string;     // applicationId 또는
+  applicationName?: string;   // applicationName 중 하나 필수
+
+  // 인증
+  getJwt?: () => Promise<string>;   // 권장
+  jwt?: string;
+  /** @deprecated getJwt를 대신 사용하세요 */
+  apiKey?: string;
+
+  // 표시
+  language?: 'en' | 'ko';
+  screenshotMode?: 'fullpage' | 'viewport';
+
+  // 동작
+  useVision?: boolean;
+  observeTargetSelector?: string;
+  pageSanitizationScript?: (document: Document) => void;
+  enableSessionRecording?: boolean;
+  enableScreenHistoryRecording?: boolean;
+
+  // 세션
+  sessionConfig?: {
+    inactivityTimeout?: number;
+    maxSessionAge?: number;
+    showNotification?: boolean;
+  };
+
+  // 디버그
+  logLevel?: LogLevel;
+  debugMode?: boolean;
+
+  // 안정성
+  stability?: StabilityConfig;
+}
+```
+
+---
+
+## AssistantButton Props
+
+`AssistantButton` 컴포넌트는 커스터마이징을 위한 선택적 props를 받습니다:
+
+```tsx
+<AssistantButton
+  iconVariant="question"        // 'default' (Moss 로고) 또는 'question' (? 아이콘)
+  iconUrl="/custom-icon.svg"    // 커스텀 아이콘 URL (iconVariant 재정의)
+  position={{ bottom: 20, right: 80 }}  // 버튼 위치 (픽셀)
+  onButtonClick={() => {}}      // 클릭 시 콜백
+/>
+```
+
+| Prop | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `iconVariant` | `'default' \| 'question'` | `'question'` | 내장 아이콘 스타일 |
+| `iconUrl` | `string` | — | 커스텀 아이콘 이미지 URL |
+| `position` | `{ bottom?, right?, top?, left? }` | `{ bottom: 20, right: 80 }` | 버튼 위치 |
+| `onButtonClick` | `() => void` | — | 클릭 콜백 |
+
+## 다음 단계
+
+<CardGroup cols={2}>
+    <Card title="고급" icon="sliders" href="/ko/sdk/advanced">
+        안정성 튜닝, Shadow DOM, CSP 헤더
+    </Card>
+    <Card title="설정 참조" icon="list" href="/ko/configurations/settings-reference">
+        대시보드 설정 옵션
+    </Card>
+</CardGroup>

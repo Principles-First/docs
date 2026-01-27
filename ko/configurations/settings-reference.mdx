@@ -539,20 +539,11 @@ SDK 통합 문제를 해결하는 데 유용합니다.
   </Tab>
 </Tabs>
 
-#### DOM 안정성 전략
+#### DOM 안정성
 
-스크린샷을 찍기 전에 SDK가 DOM 변경이 안정화될 때까지 기다리는 방법을 설정합니다.
+컨텍스트를 캡처하기 전에 SDK가 페이지 안정화를 기다리는 방법을 설정합니다. SDK는 여러 감지 레이어를 순차적으로 실행하며 (네트워크 유휴, DOM 뮤테이션, 브라우저 유휴 등) 각 레이어를 개별적으로 활성화하거나 비활성화할 수 있습니다.
 
-**디바운스 전략:**
-
--   변경 후 비활동 기간 동안 대기
--   **디바운스 지연:** 마지막 변경 후 대기 시간 (기본값: 300ms)
--   **최대 대기 시간:** 대기할 최대 시간 (기본값: 2000ms)
-
-**고정 전략:**
-
--   변경 후 고정된 시간 동안 대기
--   **대기 시간:** 고정 지연(밀리초) (기본값: 500ms)
+**기본값:** 네트워크 유휴, DOM 뮤테이션, 브라우저 유휴, 파이널 프레임 레이어 활성화. 로딩 인디케이터 및 레이아웃 시프트 레이어 비활성화.
 
 <Tabs>
   <Tab title="대시보드">
@@ -564,9 +555,12 @@ SDK 통합 문제를 해결하는 데 유용합니다.
       applicationId: 'YOUR_APP_ID',
       userId: 'USER_ID',
       stability: {
-        strategy: 'debounce',
-        debounceDelay: 500,
-        maxWaitTime: 3000
+        layers: {
+          loadingIndicators: true, // 로딩 인디케이터 감지 활성화
+        },
+        domMutations: {
+          quietPeriodMs: 1000, // DOM 안정 대기 1초 (기본값: 800ms)
+        },
       }
     })
     ```
@@ -574,8 +568,7 @@ SDK 통합 문제를 해결하는 데 유용합니다.
 </Tabs>
 
 <Tip>
-    빈번한 업데이트가 있는 동적 애플리케이션에는 디바운스를 사용하세요. 예측
-    가능한 애플리케이션에는 고정을 사용하세요.
+    전체 레이어별 문서는 [SDK 고급 설정](/ko/sdk/advanced#안정성-튜닝) 가이드를 참조하세요.
 </Tip>
 
 ### 벡터 저장소 설정
@@ -662,12 +655,17 @@ interface MossConfig {
     screenshotMode?: "fullpage" | "viewport"; // 스크린샷 캡처 모드 (기본값: 'fullpage')
     observeTargetSelector?: string; // DOM 관찰 타겟 (기본값: 'body')
 
-    // DOM 안정성
+    // DOM 안정성 (전체 참조는 SDK 고급 문서 참조)
     stability?: {
-        strategy: "debounce" | "fixed";
-        debounceDelay?: number; // 디바운스 전략용 (기본값: 300ms)
-        maxWaitTime?: number; // 디바운스의 최대 대기 시간 (기본값: 2000ms)
-        waitTime?: number; // 고정 전략용 (기본값: 500ms)
+        maxTotalWaitMs?: number; // 최대 총 대기 시간 (기본값: 15000ms)
+        layers?: {
+            networkIdle?: boolean; // 기본값: true
+            domMutations?: boolean; // 기본값: true
+            loadingIndicators?: boolean; // 기본값: false
+            layoutShift?: boolean; // 기본값: false
+            browserIdle?: boolean; // 기본값: true
+            finalFrame?: boolean; // 기본값: true
+        };
     };
 }
 ```
@@ -725,10 +723,12 @@ window.Moss.init({
     debugMode: true,
     logLevel: "DEBUG",
 
-    // 테스트를 위한 빠른 안정성
+    // 빠른 테스트를 위한 최소 안정성 검사
     stability: {
-        strategy: "fixed",
-        waitTime: 100,
+        layers: {
+            networkIdle: false,
+            browserIdle: false,
+        },
     },
 
     // 더 빠른 테스트를 위한 뷰포트 스크린샷
@@ -788,9 +788,7 @@ window.Moss.init({
 ### 성능 고려사항
 
 1. **스크린샷 모드**: 매우 긴 페이지가 있는 앱의 경우 처리 시간을 줄이기 위해 `viewport` 모드 사용
-2. **안정성 전략**:
-    - 매우 동적인 앱 (빈번한 업데이트가 있는 SPA)의 경우 `debounce` 사용
-    - 제어된 업데이트가 있는 예측 가능한 앱의 경우 `fixed` 사용
+2. **안정성 레이어**: 앱이 확실히 사라지는 스켈레톤 스크린을 사용하지 않는 한 `loadingIndicators` 및 `layoutShift` 레이어를 비활성화(기본값)로 유지하세요
 3. **세션 기록**: 개인정보 보호가 민감한 페이지 또는 사용자의 경우 비활성화
 4. **로그 레벨**: 오버헤드를 줄이기 위해 프로덕션에서 `WARN` 또는 `ERROR` 사용
 

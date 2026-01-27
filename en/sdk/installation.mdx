@@ -1,0 +1,250 @@
+---
+title: "Installation"
+description: "Install the Moss SDK via NPM or CDN script tag"
+icon: "download"
+---
+
+# Installation
+
+Choose the integration method that fits your application.
+
+<Info>
+    You'll need your **Application ID** from the [Moss Dashboard](https://dashboard.viamoss.ai). You'll also need a JWT signing key — see [Authentication](/en/sdk/authentication).
+</Info>
+
+## NPM Package (React)
+
+For React 17+ applications.
+
+### Install
+
+```bash
+npm install @viamoss/moss-sdk
+```
+
+### Basic Setup
+
+Add `AgentProvider` and `AssistantButton` to your app. The provider does **not** need to wrap your entire application — just the Moss components.
+
+```tsx App.tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
+function App() {
+  return (
+    <>
+      <YourApp />
+      <AgentProvider config={{
+        apiUrl: 'https://clippy-api.viamoss.ai',
+        applicationId: 'YOUR_APP_ID',
+        userId: currentUser.id,
+        getJwt: () => fetchMossToken(),
+      }}>
+        <AssistantButton />
+      </AgentProvider>
+    </>
+  );
+}
+```
+
+<Tip>
+    `AgentProvider` only needs to wrap the Moss UI components (`AssistantButton`). It observes the full page DOM regardless of where it sits in the React tree.
+</Tip>
+
+### Peer Dependencies
+
+The SDK requires React 17 or 18 as a peer dependency:
+
+```json
+{
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0"
+  }
+}
+```
+
+---
+
+## CDN Script Tag
+
+For any web application, regardless of framework.
+
+### Basic Setup
+
+Add the script tag to your HTML. The SDK auto-initializes and renders the assistant button.
+
+```html
+<script
+  src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID"
+  data-api-base="https://clippy-api.viamoss.ai"
+></script>
+```
+
+### Configuration via JavaScript
+
+For more control, configure via `window.mossSettings` before the script loads:
+
+```html
+<script>
+  window.mossSettings = {
+    apiUrl: 'https://clippy-api.viamoss.ai',
+    userId: 'user-123',
+    jwt: 'YOUR_JWT_TOKEN',
+    language: 'en',
+  };
+</script>
+<script src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID"></script>
+```
+
+### Global API
+
+After initialization, a global `window.MossSDK` object is available:
+
+```javascript
+// Reinitialize with new config
+await window.MossSDK.boot({ userId: 'new-user' });
+
+// Update user identity (triggers reinitialization)
+window.MossSDK.identify('user-456', { plan: 'premium' });
+
+// Update config at runtime
+window.MossSDK.updateConfig({ language: 'ko' });
+
+// Tear down completely
+window.MossSDK.shutdown();
+```
+
+---
+
+## Framework Examples
+
+<Tabs>
+  <Tab title="Next.js (App Router)">
+    ```tsx app/layout.tsx
+    import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+    import { auth } from '@/lib/auth';
+
+    export default async function RootLayout({ children }) {
+      const session = await auth();
+
+      return (
+        <html>
+          <body>
+            {children}
+            <MossAssistant userId={session.user.id} />
+          </body>
+        </html>
+      );
+    }
+
+    // Client component for Moss
+    'use client';
+    function MossAssistant({ userId }: { userId: string }) {
+      return (
+        <AgentProvider config={{
+          apiUrl: 'https://clippy-api.viamoss.ai',
+          applicationId: 'YOUR_APP_ID',
+          userId,
+          getJwt: () => fetch('/api/moss-token').then(r => r.json()).then(d => d.token),
+        }}>
+          <AssistantButton />
+        </AgentProvider>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Next.js (Script Tag)">
+    ```tsx app/layout.tsx
+    import Script from 'next/script';
+
+    export default function RootLayout({ children }) {
+      return (
+        <html>
+          <body>
+            {children}
+            <Script
+              src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID"
+              data-api-base="https://clippy-api.viamoss.ai"
+              strategy="lazyOnload"
+            />
+          </body>
+        </html>
+      );
+    }
+    ```
+  </Tab>
+
+  <Tab title="Vue.js">
+    ```vue App.vue
+    <script setup>
+    import { onMounted, onUnmounted } from 'vue';
+
+    let script = null;
+
+    onMounted(() => {
+      window.mossSettings = {
+        apiUrl: 'https://clippy-api.viamoss.ai',
+        userId: 'USER_ID',
+        jwt: 'YOUR_JWT_TOKEN',
+      };
+
+      script = document.createElement('script');
+      script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID';
+      script.async = true;
+      document.head.appendChild(script);
+    });
+
+    onUnmounted(() => {
+      if (script && document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    });
+    </script>
+    ```
+  </Tab>
+
+  <Tab title="Angular">
+    ```typescript app.component.ts
+    import { Component, OnInit, OnDestroy } from '@angular/core';
+
+    @Component({
+      selector: 'app-root',
+      templateUrl: './app.component.html',
+    })
+    export class AppComponent implements OnInit, OnDestroy {
+      private script: HTMLScriptElement | null = null;
+
+      ngOnInit() {
+        (window as any).mossSettings = {
+          apiUrl: 'https://clippy-api.viamoss.ai',
+          userId: 'USER_ID',
+          jwt: 'YOUR_JWT_TOKEN',
+        };
+
+        this.script = document.createElement('script');
+        this.script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID';
+        this.script.async = true;
+        document.head.appendChild(this.script);
+      }
+
+      ngOnDestroy() {
+        if (this.script && document.head.contains(this.script)) {
+          document.head.removeChild(this.script);
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card title="Authentication" icon="lock" href="/en/sdk/authentication">
+        Set up JWT token authentication
+    </Card>
+    <Card title="Configuration" icon="gear" href="/en/sdk/configuration">
+        Configure SDK behavior and options
+    </Card>
+</CardGroup>

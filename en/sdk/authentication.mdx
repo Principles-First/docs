@@ -1,0 +1,197 @@
+---
+title: "Authentication"
+description: "Secure your SDK integration with JWT authentication"
+icon: "lock"
+---
+
+# Authentication
+
+JWT (JSON Web Token) is the recommended way to authenticate SDK requests. It provides cryptographic verification, automatic token refresh, and per-user session ownership.
+
+<Info>
+    JWT signing keys are managed in the [Moss Dashboard](https://dashboard.viamoss.ai) under **API Keys**.
+</Info>
+
+## How It Works
+
+1. Your backend holds a **JWT signing key** (generated in the Moss Dashboard)
+2. When a user loads your app, your backend **signs a JWT** with the user's identity
+3. The SDK sends this token with every request to the Moss backend
+4. The Moss backend **verifies the signature** and extracts the user identity
+
+```
+User loads app → Your backend signs JWT → SDK sends JWT → Moss verifies
+```
+
+## Setup
+
+### 1. Generate a Signing Key
+
+In the Moss Dashboard, navigate to **API Keys** and create a JWT signing key. You'll receive:
+
+- **Key ID** (`kid`) — included in the JWT header
+- **Secret** — used to sign tokens (store securely, never expose to the client)
+
+<Warning>
+    The secret is shown only once. Store it in your backend's environment variables or secrets manager.
+</Warning>
+
+### 2. Create a Token Endpoint
+
+Add an endpoint to your backend that signs JWTs for authenticated users.
+
+<Tabs>
+  <Tab title="Node.js">
+    ```javascript
+    const jwt = require('jsonwebtoken');
+
+    app.get('/api/moss-token', requireAuth, (req, res) => {
+      const token = jwt.sign(
+        {
+          sub: req.user.id,              // Required: user identifier
+          app: 'YOUR_APPLICATION_ID',    // Required: Moss application ID
+          email: req.user.email,         // Optional: user email
+          name: req.user.name,           // Optional: user name
+        },
+        process.env.MOSS_JWT_SECRET,
+        {
+          algorithm: 'HS256',
+          expiresIn: '1h',
+          header: { kid: process.env.MOSS_KEY_ID },
+        }
+      );
+
+      res.json({ token });
+    });
+    ```
+  </Tab>
+
+  <Tab title="Python">
+    ```python
+    import jwt
+    from datetime import datetime, timedelta
+
+    @app.route('/api/moss-token')
+    @require_auth
+    def moss_token():
+        token = jwt.encode(
+            {
+                'sub': current_user.id,           # Required: user identifier
+                'app': 'YOUR_APPLICATION_ID',     # Required: Moss application ID
+                'email': current_user.email,      # Optional
+                'name': current_user.name,        # Optional
+                'exp': datetime.utcnow() + timedelta(hours=1),
+                'iat': datetime.utcnow(),
+            },
+            os.environ['MOSS_JWT_SECRET'],
+            algorithm='HS256',
+            headers={'kid': os.environ['MOSS_KEY_ID']},
+        )
+
+        return jsonify({'token': token})
+    ```
+  </Tab>
+</Tabs>
+
+### 3. Configure the SDK
+
+Pass a `getJwt` function that fetches a fresh token from your endpoint. The SDK calls this automatically when the token expires.
+
+<Tabs>
+  <Tab title="React (NPM)">
+    ```tsx
+    <AgentProvider config={{
+      apiUrl: 'https://clippy-api.viamoss.ai',
+      applicationId: 'YOUR_APP_ID',
+      userId: currentUser.id,
+      getJwt: async () => {
+        const res = await fetch('/api/moss-token');
+        const data = await res.json();
+        return data.token;
+      },
+    }}>
+      <AssistantButton />
+    </AgentProvider>
+    ```
+  </Tab>
+
+  <Tab title="CDN (Script Tag)">
+    ```html
+    <script>
+      window.mossSettings = {
+        apiUrl: 'https://clippy-api.viamoss.ai',
+        userId: 'USER_ID',
+        getJwt: async function() {
+          const res = await fetch('/api/moss-token');
+          const data = await res.json();
+          return data.token;
+        },
+      };
+    </script>
+    <script src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID"></script>
+    ```
+  </Tab>
+</Tabs>
+
+## JWT Claims Reference
+
+| Claim | Required | Description |
+|-------|----------|-------------|
+| `sub` | Yes | User identifier (string) |
+| `app` | Yes | Moss application UUID |
+| `exp` | Yes | Expiration time (Unix timestamp) |
+| `iat` | Yes | Issued at time (Unix timestamp) |
+| `email` | No | User email address |
+| `name` | No | User display name |
+| `metadata` | No | Custom metadata (object) |
+
+## Token Refresh
+
+The SDK handles token refresh automatically when you provide `getJwt`:
+
+- Checks token expiration before each request
+- Calls `getJwt()` when the token is within 60 seconds of expiring
+- Retries failed requests with the new token
+
+If you have a static token that doesn't need refresh, use `jwt` instead:
+
+```tsx
+<AgentProvider config={{
+  // ...
+  jwt: 'YOUR_STATIC_TOKEN',  // No auto-refresh
+}}>
+```
+
+<Tip>
+    Prefer `getJwt` over `jwt` for production applications. It ensures tokens are always fresh.
+</Tip>
+
+## API Key Authentication (Legacy)
+
+<Warning>
+    API key authentication is deprecated and will be removed in v2.0. Migrate to JWT.
+</Warning>
+
+API keys can still be used during development or migration:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'user-123',
+  apiKey: 'YOUR_API_KEY',  // Deprecated
+}}>
+```
+
+API keys lack per-user identity verification and token expiration. JWT is recommended for all production deployments.
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card title="Configuration" icon="gear" href="/en/sdk/configuration">
+        Full SDK configuration reference
+    </Card>
+    <Card title="Installation" icon="download" href="/en/sdk/installation">
+        Installation guides by framework
+    </Card>
+</CardGroup>

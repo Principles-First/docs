@@ -1,0 +1,223 @@
+---
+title: "Advanced"
+description: "Stability tuning, Shadow DOM, CSP, and troubleshooting"
+icon: "sliders"
+---
+
+# Advanced Configuration
+
+## Stability Tuning
+
+Before capturing page context, the SDK waits for the page to stabilize. This avoids sending incomplete or mid-render snapshots to the AI. The stability system runs six detection layers in sequence:
+
+| Layer | What It Detects | Default |
+|-------|----------------|---------|
+| **Network Idle** | Pending fetch/XHR requests | Enabled |
+| **DOM Mutations** | DOM changes (via MutationObserver) | Enabled |
+| **Loading Indicators** | Spinners, skeletons, `[aria-busy]` | Disabled |
+| **Layout Shifts** | Visual layout changes (via PerformanceObserver) | Disabled |
+| **Browser Idle** | CPU idle (via requestIdleCallback) | Enabled |
+| **Final Frame** | One requestAnimationFrame | Enabled |
+
+<Info>
+    Loading indicators and layout shift layers are disabled by default because many sites have persistent loading animations that would cause unnecessary delays. Enable them if your application uses skeleton screens that reliably disappear.
+</Info>
+
+### Enabling Additional Layers
+
+```tsx
+<AgentProvider config={{
+  // ...
+  stability: {
+    layers: {
+      loadingIndicators: true,  // Enable loading indicator detection
+      layoutShift: true,        // Enable layout shift detection
+    },
+  },
+}}>
+```
+
+### Layer-Specific Configuration
+
+Each layer can be configured individually:
+
+```tsx
+stability: {
+  // Global timeouts
+  maxTotalWaitMs: 15000,       // Max total time across all layers (default: 15s)
+  networkTimeoutMs: 10000,     // Network idle timeout (default: 10s)
+  browserIdleTimeoutMs: 500,   // Browser idle timeout (default: 500ms)
+
+  // DOM mutations layer
+  domMutations: {
+    quietPeriodMs: 800,        // No mutations for this long = stable (default: 800ms)
+    excludeSelectors: ['.live-clock', '.notification-badge'],
+  },
+
+  // Loading indicators layer (must also enable via layers.loadingIndicators)
+  loadingIndicators: {
+    selectors: ['[class*="skeleton"]', '.spinner', '[aria-busy="true"]'],
+    excludeSelectors: ['.permanent-loader'],
+    timeoutMs: 5000,
+  },
+
+  // Layout shift layer (must also enable via layers.layoutShift)
+  layoutShift: {
+    quietPeriodMs: 200,        // No shifts for this long = stable (default: 200ms)
+    ignoreThreshold: 0.01,     // Ignore tiny shifts (default: 0.01)
+  },
+}
+```
+
+### Disabling Stability Checks
+
+For testing or very simple pages, you can disable layers:
+
+```tsx
+stability: {
+  layers: {
+    networkIdle: false,
+    domMutations: false,
+    browserIdle: false,
+    finalFrame: false,
+  },
+}
+```
+
+<Warning>
+    Disabling stability layers may cause the AI to receive incomplete page context. Only disable for testing or if you're certain the page is fully rendered.
+</Warning>
+
+### After Reload Handling
+
+If your application triggers full page reloads during guided steps, enable the `afterReload` option to preserve state:
+
+```tsx
+stability: {
+  afterReload: {
+    enabled: true,
+    waitMs: 1000,           // Wait after reload before capturing (default: 1000ms)
+    pendingTTL: 30000,      // Keep pending state in storage (default: 30s)
+  },
+}
+```
+
+---
+
+## Shadow DOM
+
+The SDK renders all UI inside a Shadow DOM attached to `document.body`. This means:
+
+- **Your CSS cannot affect Moss UI** — styles are fully encapsulated
+- **Moss CSS cannot affect your app** — no style leakage
+- **DOM queries from your app won't find Moss elements** — `document.querySelector` won't match elements inside the shadow root
+
+<Tip>
+    If you're using automated testing tools (Cypress, Playwright, etc.), you'll need to pierce the shadow DOM to interact with Moss elements. Look for the `#moss-sdk-shadow-root` host element.
+</Tip>
+
+---
+
+## Content Security Policy (CSP)
+
+If your application uses strict CSP headers, you may need to allow:
+
+| Directive | Value | Reason |
+|-----------|-------|--------|
+| `connect-src` | Your Moss backend URL | API requests |
+| `script-src` | CDN URL (if using script tag) | SDK script |
+| `style-src` | `'unsafe-inline'` | Shadow DOM styles |
+| `img-src` | `blob:` `data:` | Screenshot processing |
+
+Example CSP header:
+
+```
+Content-Security-Policy:
+  connect-src 'self' https://clippy-api.viamoss.ai;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' blob: data:;
+```
+
+---
+
+## DOM Observation Scope
+
+By default, the SDK observes `document.body` for changes. To limit observation to a specific part of your page:
+
+```tsx
+<AgentProvider config={{
+  // ...
+  observeTargetSelector: '#main-content',
+}}>
+```
+
+This is useful when:
+- Your app has a complex sidebar or header that shouldn't trigger re-captures
+- You want to reduce noise from unrelated DOM changes
+- The assistant should only help with a specific section of the page
+
+---
+
+## Page Sanitization
+
+Remove sensitive content from the DOM before the SDK captures context:
+
+```tsx
+<AgentProvider config={{
+  // ...
+  pageSanitizationScript: (doc) => {
+    // Remove credit card fields
+    doc.querySelectorAll('[data-sensitive]').forEach(el => {
+      el.textContent = '[REDACTED]';
+    });
+    // Remove tracking pixels
+    doc.querySelectorAll('img[width="1"]').forEach(el => el.remove());
+  },
+}}>
+```
+
+<Warning>
+    The sanitization function runs on a cloned document, not the live DOM. Your users won't see any changes — this only affects what the AI sees.
+</Warning>
+
+---
+
+## Troubleshooting
+
+### Assistant button doesn't appear
+
+1. Check the browser console for `[MossSDK]` errors
+2. Verify `applicationId` matches a valid application in the Dashboard
+3. Confirm `apiUrl` is reachable from the browser
+4. Check that your JWT signing key is active and not revoked
+
+### "Failed to fetch config" error
+
+- The SDK couldn't reach the backend. Check `apiUrl` and network/CORS settings.
+- If using CSP, ensure `connect-src` includes the backend URL.
+
+### Screenshots are blank or incomplete
+
+- Try switching `screenshotMode` to `'viewport'`
+- Increase `stability.domMutations.quietPeriodMs` if the page has slow animations
+- Check if iframes or cross-origin content is blocking capture
+
+### Styles conflict with host application
+
+This shouldn't happen — the SDK uses Shadow DOM isolation. If you see conflicts:
+- Check if your app is using `!important` on `*` or `body` selectors
+- Verify no JavaScript is modifying the shadow root
+
+### Debug mode
+
+Enable verbose logging to diagnose issues:
+
+```tsx
+<AgentProvider config={{
+  // ...
+  debugMode: true,
+  logLevel: 'DEBUG',  // or import { LogLevel } from '@viamoss/moss-sdk'
+}}>
+```
+
+This logs stability layer timing, network requests, context capture details, and API responses to the browser console.
