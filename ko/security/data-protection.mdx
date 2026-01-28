@@ -1,0 +1,266 @@
+---
+title: "데이터 보호"
+description: "Moss가 암호화, 검증 및 보안 저장을 통해 데이터를 보호하는 방법"
+---
+
+## 개요
+
+Moss는 정보가 전체 수명 주기 동안 안전하게 유지되도록 여러 계층의 데이터 보호를 구현합니다.
+
+---
+
+## 암호화
+
+### 전송 중
+
+Moss로 전송되는 모든 데이터는 암호화됩니다:
+
+- **TLS 1.2+** - 모든 API 엔드포인트에 HTTPS 필요
+- **인증서 검증** - 엄격한 인증서 확인
+- **HSTS** - HTTP Strict Transport Security 헤더 적용
+
+<Info>
+    HTTP 요청은 자동으로 HTTPS로 리디렉션됩니다. API 트래픽에는 암호화되지
+    않은 연결이 절대 허용되지 않습니다.
+</Info>
+
+### 저장 시
+
+Moss 데이터베이스에 저장된 데이터는 보호됩니다:
+
+- **데이터베이스 암호화** - 저장 시 암호화가 있는 PostgreSQL
+- **자격 증명 해싱** - 모든 비밀이 암호화 해시로 저장
+- **보안 키 저장** - 암호화 키가 데이터와 별도로 관리
+
+---
+
+## 입력 검증
+
+모든 API 입력은 처리 전에 검증됩니다:
+
+### 스키마 검증
+
+모든 API 엔드포인트는 Pydantic 스키마 검증을 사용합니다:
+
+```python
+class SessionRequest(BaseModel):
+    user_id: str
+    application_id: str
+    metadata: Optional[dict] = None
+
+    @validator('user_id')
+    def validate_user_id(cls, v):
+        if len(v) > 256:
+            raise ValueError('user_id too long')
+        return v
+```
+
+### 검증 규칙
+
+| 입력 유형 | 검증 |
+|----------|------|
+| 문자열 필드 | 길이 제한, 형식 검증 |
+| ID | UUID 형식 확인 |
+| 열거형 | 허용된 값만 |
+| 중첩된 객체 | 재귀적 검증 |
+
+### 거부 동작
+
+유효하지 않은 요청은 명확한 오류 응답을 받습니다:
+
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "user_id"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    }
+  ]
+}
+```
+
+---
+
+## 민감한 데이터 처리
+
+### 자동 편집
+
+Moss는 로깅 전에 민감한 데이터를 자동으로 정제합니다:
+
+**편집되는 필드:**
+- `api_key`, `apiKey`
+- `authorization`
+- `password`
+- `secret`
+- `token`
+- `x-api-key`
+
+**작동 방식:**
+
+```python
+# 로깅 전
+{
+    "user_id": "user-123",
+    "api_key": "app_abc123xyz..."
+}
+
+# 정제 후
+{
+    "user_id": "user-123",
+    "api_key": "[REDACTED]"
+}
+```
+
+### 재귀적 정제
+
+편집은 중첩된 객체와 배열에도 적용됩니다:
+
+```python
+{
+    "config": {
+        "auth": {
+            "token": "[REDACTED]"  # 중첩된 필드도 정제됨
+        }
+    }
+}
+```
+
+---
+
+## 자격 증명 저장
+
+### API 키
+
+API 키는 절대 평문으로 저장되지 않습니다:
+
+| 단계 | 보호 |
+|------|------|
+| 생성 | 암호학적으로 무작위 (`secrets.token_urlsafe`) |
+| 저장 | SHA-256 해시 |
+| 비교 | 상수 시간 비교 (타이밍 안전) |
+| 표시 | 생성 시 한 번만 표시, 이후 검색 불가 |
+
+### JWT 서명 키
+
+JWT 비밀은 향상된 보호를 받습니다:
+
+| 단계 | 보호 |
+|------|------|
+| 생성 | 256비트 엔트로피 (`secrets.token_urlsafe(32)`) |
+| 저장 | Argon2id 해시 (권장) |
+| 로테이션 | 여러 활성 키 지원 |
+| 폐기 | 유예 기간이 있는 예정된 폐기 |
+
+### 암호와 유사한 비밀
+
+모든 암호 동등 자격 증명은 다음을 사용합니다:
+
+- **Argon2id** - 메모리 하드 해싱 알고리즘
+- **고유 솔트** - 자격 증명별 무작위 솔트
+- **타이밍 안전 비교** - 타이밍 공격 방지
+
+---
+
+## 보안 기본값
+
+Moss는 명시적인 옵트아웃이 필요한 보안 기본값을 사용합니다:
+
+### 프로덕션 보호
+
+| 설정 | 프로덕션 동작 |
+|------|--------------|
+| `SKIP_SDK_AUTH` | 무시됨 (항상 인증 필요) |
+| `SKIP_CLERK_VERIFICATION` | 무시됨 (항상 검증) |
+| 디버그 엔드포인트 | 비활성화됨 |
+| 상세 로깅 | 비활성화됨 |
+
+### 실패 시 폐쇄 설계
+
+```python
+def should_skip_sdk_auth(self) -> bool:
+    # 프로덕션은 항상 인증 필요
+    if self.app_env == AppEnvironment.PRODUCTION:
+        return False  # 재정의 불가
+
+    # 개발은 명시적 옵트인 필요
+    return self.skip_sdk_auth is True
+```
+
+---
+
+## 도메인 화이트리스트
+
+승인된 도메인으로 SDK 사용 제한:
+
+### 설정
+
+**설정 > 보안**에서 대시보드에 허용된 도메인 설정:
+
+```
+app.example.com
+staging.example.com
+localhost:3000
+```
+
+### 적용
+
+| 시나리오 | 동작 |
+|----------|------|
+| 빈 화이트리스트 | SDK가 모든 도메인에서 작동 |
+| 화이트리스트 구성됨 | SDK가 목록의 도메인에서만 작동 |
+| 목록에 없는 도메인 | SDK 초기화 실패 |
+
+<Warning>
+    화이트리스트에 모든 환경(프로덕션, 스테이징, 개발)을 포함하는 것을
+    잊지 마세요.
+</Warning>
+
+---
+
+## 데이터 최소화
+
+Moss는 데이터 최소화 원칙을 따릅니다:
+
+### 수집되는 데이터
+
+| 데이터 유형 | 목적 | 보존 |
+|------------|------|------|
+| 사용자 ID | 세션 식별 | 구성 가능 |
+| 스크린샷 | AI를 위한 시각적 컨텍스트 | 세션 기간 |
+| 채팅 메시지 | 대화 히스토리 | 구성 가능 |
+| 세션 녹화 | 리플레이 및 디버깅 | 구성 가능 |
+
+### 사용자 제어
+
+사용자는 SDK 설정을 통해 데이터 수집을 제어할 수 있습니다:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    enableSessionRecording: false,      // 녹화 비활성화
+    enableScreenHistoryRecording: false // 히스토리 비활성화
+})
+```
+
+---
+
+## 다음 단계
+
+<CardGroup cols={2}>
+    <Card
+        title="감사 로깅"
+        icon="clipboard-list"
+        href="/ko/security/audit-logging"
+    >
+        모든 시스템 활동 추적 및 검토
+    </Card>
+    <Card
+        title="규정 준수"
+        icon="certificate"
+        href="/ko/security/compliance"
+    >
+        GDPR, 데이터 삭제 및 인증
+    </Card>
+</CardGroup>

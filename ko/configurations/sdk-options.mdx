@@ -1,0 +1,352 @@
+---
+title: "SDK 옵션"
+description: "SDK 초기화 매개변수를 통한 Moss 동작 구성"
+---
+
+## 개요
+
+SDK 초기화 옵션을 사용하면 애플리케이션 코드에서 직접 Moss 동작을 사용자 정의할 수 있습니다. 이러한 설정은 지정 시 **대시보드 기본값을 재정의**하여 개발자에게 배포, 환경 또는 사용자 세그먼트별로 세밀한 제어를 제공합니다.
+
+<Info>
+    **우선순위 알림:** SDK 초기화 옵션은 대시보드 설정보다 우선합니다.
+    코드에서 옵션을 구성하면 대시보드에서 설정한 값을 재정의합니다. 이를
+    통해 개발자는 대시보드 설정을 기본값으로 사용하면서 배포별로 동작을
+    사용자 정의할 수 있습니다.
+</Info>
+
+---
+
+## 필수 옵션
+
+SDK를 초기화할 때 이러한 옵션을 제공해야 합니다:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',  // 필수: 애플리케이션 ID
+    userId: 'USER_ID'              // 필수: 고유 사용자 식별자
+})
+```
+
+| 옵션 | 타입 | 설명 |
+|------|------|------|
+| `applicationId` | `string` | 대시보드의 고유 애플리케이션 ID |
+| `userId` | `string` | 현재 사용자의 고유 식별자 |
+
+<Warning>
+    `userId`는 사용자의 안정적인 식별자여야 합니다. PII(이메일, 이름)를
+    직접 사용하지 마세요 - 대신 해시되거나 익명화된 식별자를 사용하세요.
+</Warning>
+
+---
+
+## 일반 옵션
+
+SDK 동작을 사용자 정의하는 데 자주 사용되는 옵션입니다:
+
+### 언어
+
+SDK 인터페이스의 UI 언어를 설정합니다.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    language: 'ko'  // 'en', 'ko' 또는 자동 감지를 위해 undefined
+})
+```
+
+**기본값:** `undefined` (브라우저 언어 자동 감지)
+
+<Tip>
+    사용자의 브라우저 언어 기본 설정을 자동으로 사용하려면 undefined로
+    두세요.
+</Tip>
+
+### 비전
+
+스크린샷 분석 기능을 활성화 또는 비활성화합니다.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    useVision: true  // 시각적 컨텍스트 활성화
+})
+```
+
+**기본값:** `true` (대시보드에서)
+
+### 세션 녹화
+
+사용자 세션이 리플레이를 위해 녹화되는지 여부를 제어합니다.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    enableSessionRecording: false  // 개인정보에 민감한 사용자를 위해 비활성화
+})
+```
+
+**기본값:** `true` (대시보드에서)
+
+### 화면 히스토리
+
+AI 컨텍스트에 사용자 액션 히스토리를 포함합니다.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    enableScreenHistoryRecording: true
+})
+```
+
+**기본값:** `true` (대시보드에서)
+
+---
+
+## 플래닝 옵션
+
+다단계 플래닝 기능을 구성합니다:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    planning: {
+        enabled: true,           // 플래닝 기능 활성화
+        maxSteps: 15,           // 플랜당 최대 단계 (1-20)
+        allowUserSkip: true,    // 단계 건너뛰기 허용
+        showPlanOverview: true  // 실행 전 플랜 표시
+    }
+})
+```
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `enabled` | `boolean` | `false` | 플래닝 기능 활성화 |
+| `maxSteps` | `number` | `10` | 플랜의 최대 단계 (1-20) |
+| `allowUserSkip` | `boolean` | `true` | 사용자가 단계 건너뛰기 허용 |
+| `showPlanOverview` | `boolean` | `true` | 실행 전 플랜 개요 표시 |
+
+---
+
+## 세션 옵션
+
+세션 관리 동작을 구성합니다:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    sessionConfig: {
+        inactivityTimeout: 60,   // 타임아웃까지의 분
+        maxSessionAge: 4,        // 강제 만료까지의 시간
+        showNotification: true   // 세션 알림 표시
+    }
+})
+```
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `inactivityTimeout` | `number` | `30` | 세션 만료 전 비활성 시간(분) |
+| `maxSessionAge` | `number` | `2` | 최대 세션 지속 시간(시간) |
+| `showNotification` | `boolean` | `true` | 새 세션 시 알림 표시 |
+
+---
+
+## 개발자 옵션
+
+디버깅 및 사용자 정의를 위한 고급 설정입니다:
+
+### 스크린샷 모드
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    screenshotMode: 'viewport'  // 'fullpage' 또는 'viewport'
+})
+```
+
+**기본값:** `'fullpage'`
+
+| 값 | 설명 |
+|----|------|
+| `fullpage` | 전체 스크롤 가능한 페이지를 캡처 |
+| `viewport` | 보이는 부분만 캡처 |
+
+<Tip>
+    페이지가 매우 긴 앱의 경우 처리 시간을 줄이기 위해 `viewport`를
+    사용하세요.
+</Tip>
+
+### 로그 레벨
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    logLevel: 'DEBUG'  // 'ERROR', 'WARN', 'INFO', 'DEBUG'
+})
+```
+
+**기본값:** `'INFO'`
+
+높은 레벨은 모든 낮은 레벨을 포함합니다 (DEBUG는 모든 것을 표시).
+
+### 디버그 모드
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    debugMode: true
+})
+```
+
+**기본값:** `false`
+
+문제 해결을 위한 자세한 로깅 및 디버그 기능을 활성화합니다.
+
+### DOM 대상 셀렉터
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    observeTargetSelector: '#main-content'
+})
+```
+
+**기본값:** `'body'`
+
+관찰할 DOM 요소의 CSS 셀렉터입니다. 페이지의 특정 부분으로 관찰을 제한하려면 이를 변경하세요.
+
+### DOM 안정성
+
+SDK가 페이지가 안정화되기를 기다리는 방식을 구성합니다:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    stability: {
+        maxTotalWaitMs: 15000,
+        layers: {
+            networkIdle: true,
+            domMutations: true,
+            loadingIndicators: false,
+            layoutShift: false,
+            browserIdle: true,
+            finalFrame: true
+        },
+        domMutations: {
+            quietPeriodMs: 1000  // 1초 동안 DOM 정지 대기
+        }
+    }
+})
+```
+
+<Tip>
+    자세한 레이어별 문서는 [SDK 고급 설정](/ko/sdk/advanced#stability-tuning)
+    가이드를 참조하세요.
+</Tip>
+
+---
+
+## 전체 TypeScript 인터페이스
+
+SDK 설정을 위한 전체 TypeScript 인터페이스입니다:
+
+```typescript
+interface MossConfig {
+    // 필수
+    applicationId: string;
+    userId: string;
+
+    // 애플리케이션 기능
+    useVision?: boolean;
+    language?: 'en' | 'ko';
+
+    // 녹화 및 히스토리
+    enableSessionRecording?: boolean;
+    enableScreenHistoryRecording?: boolean;
+
+    // 플래닝 설정
+    planning?: {
+        enabled?: boolean;
+        maxSteps?: number;
+        allowUserSkip?: boolean;
+        showPlanOverview?: boolean;
+    };
+
+    // 세션 관리
+    sessionConfig?: {
+        inactivityTimeout?: number;
+        maxSessionAge?: number;
+        showNotification?: boolean;
+    };
+
+    // 기술 설정
+    logLevel?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+    debugMode?: boolean;
+    screenshotMode?: 'fullpage' | 'viewport';
+    observeTargetSelector?: string;
+
+    // DOM 안정성
+    stability?: {
+        maxTotalWaitMs?: number;
+        layers?: {
+            networkIdle?: boolean;
+            domMutations?: boolean;
+            loadingIndicators?: boolean;
+            layoutShift?: boolean;
+            browserIdle?: boolean;
+            finalFrame?: boolean;
+        };
+        domMutations?: {
+            quietPeriodMs?: number;
+        };
+    };
+}
+```
+
+---
+
+## SDK에서 사용할 수 없는 설정
+
+다음 설정은 대시보드를 통해서만 구성할 수 있습니다:
+
+- **AI 어시스턴트 지침** - AI를 위한 사용자 정의 지침
+- **API 키** - 인증 자격 증명
+- **도메인 접근 제어** - 허용 도메인 목록
+- **벡터 저장소 설정** - RAG 시스템 설정
+- **위험 영역** - 애플리케이션 삭제
+
+<Warning>
+    이러한 설정은 보안상의 이유로 대시보드 전용입니다. 애플리케이션 전체
+    동작 및 인증에 영향을 미칩니다.
+</Warning>
+
+---
+
+## 다음 단계
+
+<CardGroup cols={2}>
+    <Card
+        title="런타임 API"
+        icon="bolt"
+        href="/ko/configurations/runtime-api"
+    >
+        초기화 후 동적 설정 변경하기
+    </Card>
+    <Card
+        title="예시"
+        icon="lightbulb"
+        href="/ko/configurations/examples"
+    >
+        다양한 사용 사례에 대한 전체 설정 예시 보기
+    </Card>
+</CardGroup>

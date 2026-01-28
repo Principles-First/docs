@@ -1,0 +1,262 @@
+---
+title: "Compliance"
+description: "GDPR, SOC 2, ISO 27001, EU AI Act, and data subject rights"
+---
+
+## Overview
+
+Moss is committed to meeting global compliance standards and protecting user privacy. This page outlines our compliance posture and the features that support your regulatory requirements.
+
+---
+
+## GDPR Compliance
+
+Moss provides features to support your GDPR compliance obligations.
+
+### Data Subject Rights
+
+#### Right to Access (Article 15)
+
+Users can request access to their data:
+
+- Export chat history via Dashboard
+- Download session recordings
+- Access audit logs for their activity
+
+#### Right to Erasure (Article 17)
+
+Moss provides comprehensive data deletion:
+
+**What Gets Deleted:**
+- Chat sessions and messages
+- AI-generated instructions and plans
+- Screenshots and recordings
+- User records
+- Associated audit logs
+
+**Deletion Process:**
+
+1. Submit deletion request via Dashboard or API
+2. Moss validates the request
+3. All user data is permanently deleted
+4. Verification confirms deletion completeness
+
+**Deletion Verification:**
+
+```json
+{
+  "status": "completed",
+  "deleted_items": {
+    "sessions": 12,
+    "messages": 147,
+    "screenshots": 89,
+    "recordings": 12
+  },
+  "remaining_records": 0,
+  "verified_at": "2024-01-15T10:30:00Z"
+}
+```
+
+#### Right to Portability (Article 20)
+
+Export user data in standard formats:
+
+- Chat history (JSON)
+- Session metadata (JSON)
+- Audit logs (CSV)
+
+### Lawful Basis
+
+Moss supports multiple lawful bases for processing:
+
+| Basis | Implementation |
+|-------|----------------|
+| **Consent** | SDK can prompt for user consent before activation |
+| **Legitimate Interest** | Analytics and product improvement |
+| **Contract** | Providing the AI assistant service |
+
+### Data Processing Agreement
+
+Contact sales for a Data Processing Agreement (DPA) that meets your requirements.
+
+---
+
+## SOC 2 Type II
+
+Moss is pursuing SOC 2 Type II certification.
+
+### Trust Service Criteria
+
+| Criteria | Status | Description |
+|----------|--------|-------------|
+| **Security** | In Progress | Protection against unauthorized access |
+| **Availability** | In Progress | System availability for operation |
+| **Confidentiality** | In Progress | Protection of confidential information |
+
+### Controls
+
+Moss implements controls across:
+
+- **Access Control** - Role-based access, MFA, session management
+- **Change Management** - Code review, deployment approval, rollback capability
+- **Incident Response** - Detection, escalation, resolution procedures
+- **Monitoring** - Real-time alerting, audit logging, anomaly detection
+
+### Timeline
+
+SOC 2 Type II certification is expected in 2025. Contact sales for the current status and audit reports.
+
+---
+
+## ISO 27001
+
+Moss is planning ISO 27001 certification.
+
+### Information Security Management
+
+Key areas covered:
+
+- **Risk Assessment** - Regular security risk evaluations
+- **Asset Management** - Inventory and classification of information assets
+- **Access Control** - Need-to-know and least privilege principles
+- **Cryptography** - Encryption standards for data protection
+- **Operations Security** - Secure development and deployment practices
+
+### Timeline
+
+ISO 27001 certification is planned for 2025. Contact sales for updates.
+
+---
+
+## EU AI Act
+
+Moss is preparing for EU AI Act compliance as it applies to AI-powered assistant systems.
+
+### Transparency Requirements
+
+Moss supports transparency through:
+
+- **Clear AI Identification** - Users know they're interacting with AI
+- **Capability Disclosure** - Documentation of AI capabilities and limitations
+- **Decision Explanation** - AI responses include reasoning when applicable
+
+### Human Oversight
+
+- **User Control** - Users can dismiss or override AI suggestions
+- **Admin Control** - Application owners can customize AI behavior
+- **Audit Trail** - All AI interactions are logged for review
+
+### Risk Classification
+
+Moss is designed to comply with requirements for limited-risk AI systems:
+
+- Transparency obligations
+- User notification
+- Human oversight capabilities
+
+---
+
+## Domain Whitelisting
+
+Restrict where your SDK can operate:
+
+### Purpose
+
+- Prevent unauthorized use of your application ID
+- Control which environments can access Moss
+- Reduce risk of API key exposure
+
+### Configuration
+
+Add allowed domains in Dashboard under **Settings > Security**:
+
+```
+app.example.com
+staging.example.com
+localhost:3000
+```
+
+### Enforcement
+
+Requests from unlisted domains are rejected during SDK initialization.
+
+---
+
+## Security Certifications
+
+### Current
+
+| Certification | Status |
+|---------------|--------|
+| HTTPS/TLS 1.2+ | Active |
+| Secure credential storage | Active |
+| Audit logging | Active |
+
+### In Progress
+
+| Certification | Expected |
+|---------------|----------|
+| SOC 2 Type II | 2025 |
+| ISO 27001 | 2025 |
+
+### Planned
+
+| Certification | Timeline |
+|---------------|----------|
+| HIPAA | Under evaluation |
+| PCI DSS | Under evaluation |
+
+---
+
+## Compliance Features Summary
+
+| Feature | GDPR | SOC 2 | ISO 27001 | EU AI Act |
+|---------|------|-------|-----------|-----------|
+| Data deletion | Yes | Yes | Yes | - |
+| Audit logging | Yes | Yes | Yes | Yes |
+| Access control | Yes | Yes | Yes | Yes |
+| Encryption | Yes | Yes | Yes | - |
+| User consent | Yes | - | - | Yes |
+| Transparency | Yes | - | - | Yes |
+
+---
+
+## Compliance Resources
+
+### Documentation
+
+- **Privacy Policy** - Available on viamoss.ai
+- **Terms of Service** - Available on viamoss.ai
+- **Security Whitepaper** - Contact sales
+
+### Agreements
+
+- **Data Processing Agreement (DPA)** - Available for enterprise customers
+- **Business Associate Agreement (BAA)** - Available for healthcare customers
+
+### Contact
+
+For compliance inquiries:
+- Email: compliance@viamoss.ai
+- Dashboard: Support > Compliance
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card
+        title="Security Overview"
+        icon="shield-check"
+        href="/en/security/overview"
+    >
+        Complete security architecture
+    </Card>
+    <Card
+        title="Audit Logging"
+        icon="clipboard-list"
+        href="/en/security/audit-logging"
+    >
+        Detailed audit trail documentation
+    </Card>
+</CardGroup>

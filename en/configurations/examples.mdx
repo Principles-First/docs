@@ -1,0 +1,363 @@
+---
+title: "Configuration Examples"
+description: "Complete configuration examples for common use cases"
+---
+
+## Overview
+
+This page provides complete, copy-paste ready configuration examples for different use cases. Each example includes both SDK initialization and relevant runtime configurations.
+
+---
+
+## Minimal Setup
+
+The simplest configuration to get started:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID'
+})
+```
+
+This uses all Dashboard defaults. Perfect for quick testing or when Dashboard settings meet your needs.
+
+---
+
+## Power User Setup
+
+Full-featured configuration for users who need comprehensive assistance:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'premium-user-123',
+
+    // Enable all features
+    useVision: true,
+    enableSessionRecording: true,
+    enableScreenHistoryRecording: true,
+    language: 'en',
+
+    // Advanced planning
+    planning: {
+        enabled: true,
+        maxSteps: 15,
+        allowUserSkip: true,
+        showPlanOverview: true
+    },
+
+    // Extended sessions for premium users
+    sessionConfig: {
+        inactivityTimeout: 60,
+        maxSessionAge: 4,
+        showNotification: true
+    }
+})
+```
+
+---
+
+## Developer / Debug Setup
+
+Configuration optimized for development and debugging:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'dev-user',
+
+    // Debug settings
+    debugMode: true,
+    logLevel: 'DEBUG',
+
+    // Minimal stability checks for fast testing
+    stability: {
+        layers: {
+            networkIdle: false,
+            browserIdle: false
+        }
+    },
+
+    // Viewport screenshots for faster testing
+    screenshotMode: 'viewport'
+})
+```
+
+<Tip>
+    Remember to disable debug settings in production for better performance.
+</Tip>
+
+---
+
+## Privacy-Focused Setup
+
+Minimal data collection for privacy-conscious users:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'privacy-user-456',
+
+    // Minimal data collection
+    enableSessionRecording: false,
+    enableScreenHistoryRecording: false,
+    useVision: true,  // Still helpful but less data stored
+
+    // Short sessions
+    sessionConfig: {
+        inactivityTimeout: 15,
+        maxSessionAge: 1
+    }
+})
+```
+
+### With Runtime Privacy Toggle
+
+```javascript
+// Initial setup with recording enabled
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    enableSessionRecording: true,
+    enableScreenHistoryRecording: true
+})
+
+// Privacy toggle handler
+function setPrivacyMode(enabled) {
+    window.Moss.configure({
+        enableSessionRecording: !enabled,
+        enableScreenHistoryRecording: !enabled
+    })
+}
+```
+
+---
+
+## Multi-Tier Subscription Setup
+
+Different configurations based on subscription level:
+
+```javascript
+const subscriptionConfigs = {
+    free: {
+        planning: { enabled: false },
+        sessionConfig: {
+            inactivityTimeout: 15,
+            maxSessionAge: 1
+        }
+    },
+    pro: {
+        planning: {
+            enabled: true,
+            maxSteps: 10,
+            allowUserSkip: true,
+            showPlanOverview: true
+        },
+        sessionConfig: {
+            inactivityTimeout: 30,
+            maxSessionAge: 2
+        }
+    },
+    enterprise: {
+        planning: {
+            enabled: true,
+            maxSteps: 20,
+            allowUserSkip: true,
+            showPlanOverview: true
+        },
+        sessionConfig: {
+            inactivityTimeout: 60,
+            maxSessionAge: 8
+        }
+    }
+}
+
+function initMossForUser(user) {
+    const tierConfig = subscriptionConfigs[user.tier] || subscriptionConfigs.free
+
+    window.Moss.init({
+        applicationId: 'YOUR_APP_ID',
+        userId: user.id,
+        ...tierConfig
+    })
+}
+```
+
+---
+
+## Single Page Application (SPA)
+
+Configuration for React, Vue, or Angular applications:
+
+<Tabs>
+  <Tab title="React">
+    ```tsx
+    import { useEffect } from 'react'
+    import { useAuth } from './auth'  // Your auth hook
+
+    function App() {
+        const { user, isAuthenticated } = useAuth()
+
+        useEffect(() => {
+            if (isAuthenticated && user) {
+                window.Moss.init({
+                    applicationId: process.env.REACT_APP_MOSS_APP_ID,
+                    userId: user.id,
+                    language: user.preferredLanguage,
+                    planning: {
+                        enabled: user.subscription === 'pro'
+                    }
+                })
+            }
+        }, [isAuthenticated, user])
+
+        return <div>Your App</div>
+    }
+    ```
+  </Tab>
+  <Tab title="Vue">
+    ```vue
+    <script setup>
+    import { watch } from 'vue'
+    import { useAuth } from './composables/auth'
+
+    const { user, isAuthenticated } = useAuth()
+
+    watch([isAuthenticated, user], ([auth, u]) => {
+        if (auth && u) {
+            window.Moss.init({
+                applicationId: import.meta.env.VITE_MOSS_APP_ID,
+                userId: u.id,
+                language: u.preferredLanguage,
+                planning: {
+                    enabled: u.subscription === 'pro'
+                }
+            })
+        }
+    }, { immediate: true })
+    </script>
+    ```
+  </Tab>
+  <Tab title="Angular">
+    ```typescript
+    import { Component, OnInit } from '@angular/core'
+    import { AuthService } from './auth.service'
+
+    @Component({
+        selector: 'app-root',
+        template: '<router-outlet></router-outlet>'
+    })
+    export class AppComponent implements OnInit {
+        constructor(private auth: AuthService) {}
+
+        ngOnInit() {
+            this.auth.user$.subscribe(user => {
+                if (user) {
+                    (window as any).Moss.init({
+                        applicationId: environment.mossAppId,
+                        userId: user.id,
+                        language: user.preferredLanguage,
+                        planning: {
+                            enabled: user.subscription === 'pro'
+                        }
+                    })
+                }
+            })
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## High-Performance Setup
+
+Optimized for minimal overhead:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+
+    // Reduce screenshot processing
+    screenshotMode: 'viewport',
+
+    // Minimal logging
+    logLevel: 'ERROR',
+    debugMode: false,
+
+    // Fast stability checks
+    stability: {
+        maxTotalWaitMs: 5000,
+        layers: {
+            networkIdle: true,
+            domMutations: true,
+            loadingIndicators: false,  // Skip loading indicator detection
+            layoutShift: false,        // Skip layout shift detection
+            browserIdle: false,        // Skip requestIdleCallback
+            finalFrame: true
+        }
+    }
+})
+```
+
+---
+
+## Best Practices Summary
+
+### Dashboard vs SDK Configuration
+
+**Use Dashboard Settings When:**
+- Setting application-wide defaults
+- Configuring security policies (allowed domains, API keys)
+- Managing AI instructions that apply to all users
+- Settings that rarely change
+
+**Use SDK Initialization When:**
+- Per-user customization is needed
+- Configuration depends on environment (dev/staging/prod)
+- Different user tiers need different settings
+- Integrating with existing user preferences
+
+**Use Runtime Configuration When:**
+- Responding to user actions (privacy toggle)
+- Implementing feature flags or A/B tests
+- Session-specific overrides
+- Dynamic adjustments based on conditions
+
+### Performance Tips
+
+1. **Screenshot Mode**: Use `viewport` for long pages
+2. **Stability Layers**: Disable `loadingIndicators` and `layoutShift` unless needed
+3. **Session Recording**: Disable for privacy-sensitive pages
+4. **Log Level**: Use `WARN` or `ERROR` in production
+
+### Security Tips
+
+1. Never expose API keys in client-side code
+2. Use domain restrictions in Dashboard
+3. Implement user consent for session recording
+4. Use hashed/anonymized user IDs
+
+---
+
+## Need Help?
+
+<CardGroup cols={2}>
+    <Card
+        title="SDK Reference"
+        icon="code"
+        href="/en/configurations/sdk-options"
+    >
+        Complete SDK options reference
+    </Card>
+    <Card
+        title="Advanced Configuration"
+        icon="sliders"
+        href="/en/sdk/advanced"
+    >
+        Stability tuning and advanced features
+    </Card>
+</CardGroup>
