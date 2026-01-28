@@ -1,0 +1,196 @@
+---
+title: "Authentication"
+description: "How Moss authenticates SDK requests and Dashboard users"
+---
+
+## Overview
+
+Moss uses multiple authentication mechanisms depending on the context:
+
+| Context | Method | Description |
+|---------|--------|-------------|
+| **SDK (Recommended)** | JWT Tokens | Short-lived tokens signed with application-specific keys |
+| **SDK (Legacy)** | API Keys | Long-lived keys for simpler integrations |
+| **Dashboard** | Clerk SSO | OAuth-based single sign-on with organization support |
+
+---
+
+## JWT Authentication (Recommended)
+
+JWT (JSON Web Token) authentication provides the highest security for SDK integrations.
+
+### How It Works
+
+1. Your backend generates a signed JWT for each user session
+2. The SDK includes this token in API requests
+3. Moss validates the signature, expiration, and claims
+4. Access is granted only if all checks pass
+
+### Token Structure
+
+Moss JWTs include the following claims:
+
+| Claim | Description |
+|-------|-------------|
+| `sub` | User ID (subject) |
+| `app` | Application ID |
+| `exp` | Expiration timestamp |
+| `iat` | Issued-at timestamp |
+
+### Security Features
+
+- **HS256 Signing** - Tokens are signed using HMAC-SHA256 with your application's secret key
+- **Expiration Enforcement** - Tokens must include valid `exp` claim
+- **Key Rotation Support** - Multiple active signing keys with scheduled revocation
+- **Constant-Time Validation** - Signature verification uses timing-safe comparison
+
+### Key Management
+
+Each application can have multiple JWT signing keys:
+
+- **Key ID (`kid`)** - Unique identifier included in token header
+- **Active Status** - Keys can be deactivated without deletion
+- **Scheduled Revocation** - Set future revocation dates for graceful rotation
+- **Last Used Tracking** - Monitor key usage for security auditing
+
+<Info>
+    See the [SDK Authentication Guide](/en/sdk/authentication) for implementation
+    details and code examples.
+</Info>
+
+---
+
+## API Key Authentication (Legacy)
+
+API keys provide a simpler authentication method for basic integrations.
+
+### How It Works
+
+1. Generate an API key in the Dashboard
+2. Include the key in SDK initialization or request headers
+3. Moss validates the key against stored hashes
+
+### Security Measures
+
+- **SHA-256 Hashing** - Keys are stored as cryptographic hashes, never plaintext
+- **Constant-Time Comparison** - Prevents timing attacks during validation
+- **Single Active Key** - Only one API key per application at a time
+- **Regeneration Support** - Invalidate compromised keys immediately
+
+<Warning>
+    API keys are long-lived and provide full access to your application. Use JWT
+    authentication for production deployments where possible.
+</Warning>
+
+### Best Practices
+
+1. **Never expose API keys** in client-side code or version control
+2. **Rotate keys regularly** - Regenerate keys periodically
+3. **Use environment variables** - Store keys securely in your deployment environment
+4. **Monitor usage** - Review API access patterns in the Dashboard
+
+---
+
+## Dashboard Authentication (Clerk)
+
+The Moss Dashboard uses Clerk for authentication, providing enterprise-grade SSO capabilities.
+
+### Features
+
+- **OAuth Integration** - Sign in with Google, GitHub, or email
+- **Organization Support** - Multi-tenant access with role-based permissions
+- **Session Management** - Secure session tokens with automatic refresh
+- **MFA Support** - Optional multi-factor authentication
+
+### Organization-Based Access
+
+All Dashboard operations are scoped to your organization:
+
+- Applications belong to organizations
+- Users can be members of multiple organizations
+- Switching organizations changes your visible applications
+- API calls from Dashboard include organization context in JWT
+
+---
+
+## Multi-Tenancy Security
+
+Moss enforces strict tenant isolation at every layer:
+
+### Database Level
+
+```sql
+-- Every query includes organization filter
+SELECT * FROM applications
+WHERE clerk_organization_id = :org_id
+```
+
+### API Level
+
+- JWT tokens include organization ID in claims
+- API endpoints verify organization ownership before access
+- Cross-organization requests are rejected with 403 Forbidden
+
+### Audit Level
+
+- Access attempts to other organizations are logged
+- Security alerts can be configured for suspicious patterns
+
+---
+
+## Session Authorization
+
+Beyond authentication, Moss verifies authorization for every request:
+
+### Session Verification
+
+1. **User Ownership** - Sessions belong to specific users
+2. **Application Scope** - Sessions are bound to applications
+3. **Composite Keys** - Foreign key constraints enforce data integrity
+
+### Access Patterns
+
+| Request | Verification |
+|---------|-------------|
+| Create session | User + Application authentication |
+| Send message | Session ownership + Application match |
+| Get history | Session ownership + User match |
+
+---
+
+## Security Recommendations
+
+### For SDK Integration
+
+1. **Use JWT authentication** for production deployments
+2. **Implement token refresh** before expiration
+3. **Set short token lifetimes** (15-60 minutes recommended)
+4. **Use HTTPS** for all API communication
+
+### For Dashboard Access
+
+1. **Enable MFA** for all team members
+2. **Review organization members** regularly
+3. **Use SSO** if available in your organization
+4. **Audit access logs** periodically
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card
+        title="SDK Authentication Setup"
+        icon="code"
+        href="/en/sdk/authentication"
+    >
+        Implement JWT authentication in your application
+    </Card>
+    <Card
+        title="Data Protection"
+        icon="lock"
+        href="/en/security/data-protection"
+    >
+        Learn about encryption and data handling
+    </Card>
+</CardGroup>

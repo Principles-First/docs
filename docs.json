@@ -29,7 +29,8 @@
           {
             "group": "Getting Started",
             "pages": [
-              "en/index"
+              "en/index",
+              "en/quickstart"
             ]
           },
           {
@@ -45,8 +46,21 @@
           {
             "group": "Configuration",
             "pages": [
-              "en/quickstart",
-              "en/configurations/settings-reference"
+              "en/configurations/overview",
+              "en/configurations/dashboard-settings",
+              "en/configurations/sdk-options",
+              "en/configurations/runtime-api",
+              "en/configurations/examples"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "en/security/overview",
+              "en/security/authentication",
+              "en/security/data-protection",
+              "en/security/audit-logging",
+              "en/security/compliance"
             ]
           }
         ]
@@ -57,7 +71,8 @@
           {
             "group": "시작하기",
             "pages": [
-              "ko/index"
+              "ko/index",
+              "ko/quickstart"
             ]
           },
           {
@@ -73,8 +88,21 @@
           {
             "group": "설정",
             "pages": [
-              "ko/quickstart",
-              "ko/configurations/settings-reference"
+              "ko/configurations/overview",
+              "ko/configurations/dashboard-settings",
+              "ko/configurations/sdk-options",
+              "ko/configurations/runtime-api",
+              "ko/configurations/examples"
+            ]
+          },
+          {
+            "group": "보안",
+            "pages": [
+              "ko/security/overview",
+              "ko/security/authentication",
+              "ko/security/data-protection",
+              "ko/security/audit-logging",
+              "ko/security/compliance"
             ]
           }
         ]

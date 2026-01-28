@@ -1,0 +1,350 @@
+---
+title: "SDK Options"
+description: "Configure Moss behavior through SDK initialization parameters"
+---
+
+## Overview
+
+SDK initialization options allow you to customize Moss behavior directly in your application code. These settings **override Dashboard defaults** when specified, giving developers fine-grained control per deployment, environment, or user segment.
+
+<Info>
+    **Priority reminder:** SDK initialization options take precedence over
+    Dashboard settings. When you configure an option in code, it will override
+    the value set in the Dashboard. This allows developers to customize behavior
+    per-deployment while using Dashboard settings as defaults.
+</Info>
+
+---
+
+## Required Options
+
+These options must be provided when initializing the SDK:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',  // Required: Your application ID
+    userId: 'USER_ID'              // Required: Unique user identifier
+})
+```
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `applicationId` | `string` | Your unique application ID from the Dashboard |
+| `userId` | `string` | Unique identifier for the current user |
+
+<Warning>
+    The `userId` should be a stable identifier for your user. Avoid using PII
+    (email, name) directly - use a hashed or anonymized identifier instead.
+</Warning>
+
+---
+
+## Common Options
+
+These options are frequently used to customize SDK behavior:
+
+### Language
+
+Set the UI language for the SDK interface.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    language: 'en'  // 'en', 'ko', or undefined for auto-detect
+})
+```
+
+**Default:** `undefined` (auto-detects browser language)
+
+<Tip>
+    Leave undefined to automatically use the user's browser language preference.
+</Tip>
+
+### Vision
+
+Enable or disable screenshot analysis capabilities.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    useVision: true  // Enable visual context
+})
+```
+
+**Default:** `true` (from Dashboard)
+
+### Session Recording
+
+Control whether user sessions are recorded for replay.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    enableSessionRecording: false  // Disable for privacy-sensitive users
+})
+```
+
+**Default:** `true` (from Dashboard)
+
+### Screen History
+
+Include user action history in AI context.
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    enableScreenHistoryRecording: true
+})
+```
+
+**Default:** `true` (from Dashboard)
+
+---
+
+## Planning Options
+
+Configure multi-step planning features:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    planning: {
+        enabled: true,           // Enable planning feature
+        maxSteps: 15,           // Maximum steps per plan (1-20)
+        allowUserSkip: true,    // Allow skipping steps
+        showPlanOverview: true  // Show plan before execution
+    }
+})
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | `boolean` | `false` | Enable planning feature |
+| `maxSteps` | `number` | `10` | Maximum steps in a plan (1-20) |
+| `allowUserSkip` | `boolean` | `true` | Allow users to skip steps |
+| `showPlanOverview` | `boolean` | `true` | Show plan overview before execution |
+
+---
+
+## Session Options
+
+Configure session management behavior:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    sessionConfig: {
+        inactivityTimeout: 60,   // Minutes before timeout
+        maxSessionAge: 4,        // Hours before forced expiry
+        showNotification: true   // Show session notifications
+    }
+})
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `inactivityTimeout` | `number` | `30` | Minutes of inactivity before session expires |
+| `maxSessionAge` | `number` | `2` | Maximum session duration in hours |
+| `showNotification` | `boolean` | `true` | Show notification on new session |
+
+---
+
+## Developer Options
+
+Advanced settings for debugging and customization:
+
+### Screenshot Mode
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    screenshotMode: 'viewport'  // 'fullpage' or 'viewport'
+})
+```
+
+**Default:** `'fullpage'`
+
+| Value | Description |
+|-------|-------------|
+| `fullpage` | Captures the entire scrollable page |
+| `viewport` | Captures only the visible portion |
+
+<Tip>
+    Use `viewport` for apps with very long pages to reduce processing time.
+</Tip>
+
+### Log Level
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    logLevel: 'DEBUG'  // 'ERROR', 'WARN', 'INFO', 'DEBUG'
+})
+```
+
+**Default:** `'INFO'`
+
+Higher levels include all lower levels (DEBUG shows everything).
+
+### Debug Mode
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    debugMode: true
+})
+```
+
+**Default:** `false`
+
+Enables verbose logging and debug features for troubleshooting.
+
+### DOM Target Selector
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    observeTargetSelector: '#main-content'
+})
+```
+
+**Default:** `'body'`
+
+CSS selector for the DOM element to observe. Change this to limit observation to a specific part of your page.
+
+### DOM Stability
+
+Configure how the SDK waits for the page to stabilize:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    stability: {
+        maxTotalWaitMs: 15000,
+        layers: {
+            networkIdle: true,
+            domMutations: true,
+            loadingIndicators: false,
+            layoutShift: false,
+            browserIdle: true,
+            finalFrame: true
+        },
+        domMutations: {
+            quietPeriodMs: 1000  // Wait 1s of DOM quiet
+        }
+    }
+})
+```
+
+<Tip>
+    See the [SDK Advanced Configuration](/en/sdk/advanced#stability-tuning)
+    guide for detailed layer-by-layer documentation.
+</Tip>
+
+---
+
+## Complete TypeScript Interface
+
+Here's the full TypeScript interface for SDK configuration:
+
+```typescript
+interface MossConfig {
+    // Required
+    applicationId: string;
+    userId: string;
+
+    // Application Features
+    useVision?: boolean;
+    language?: 'en' | 'ko';
+
+    // Recording & History
+    enableSessionRecording?: boolean;
+    enableScreenHistoryRecording?: boolean;
+
+    // Planning Configuration
+    planning?: {
+        enabled?: boolean;
+        maxSteps?: number;
+        allowUserSkip?: boolean;
+        showPlanOverview?: boolean;
+    };
+
+    // Session Management
+    sessionConfig?: {
+        inactivityTimeout?: number;
+        maxSessionAge?: number;
+        showNotification?: boolean;
+    };
+
+    // Technical Settings
+    logLevel?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+    debugMode?: boolean;
+    screenshotMode?: 'fullpage' | 'viewport';
+    observeTargetSelector?: string;
+
+    // DOM Stability
+    stability?: {
+        maxTotalWaitMs?: number;
+        layers?: {
+            networkIdle?: boolean;
+            domMutations?: boolean;
+            loadingIndicators?: boolean;
+            layoutShift?: boolean;
+            browserIdle?: boolean;
+            finalFrame?: boolean;
+        };
+        domMutations?: {
+            quietPeriodMs?: number;
+        };
+    };
+}
+```
+
+---
+
+## Settings Not Available in SDK
+
+The following settings can only be configured through the Dashboard:
+
+- **AI Assistant Instructions** - Custom instructions for the AI
+- **API Keys** - Authentication credentials
+- **Domain Access Control** - Allowed domains list
+- **Vector Store Configuration** - RAG system settings
+- **Danger Zone** - Application deletion
+
+<Warning>
+    These settings are Dashboard-only for security reasons. They affect
+    application-wide behavior and authentication.
+</Warning>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card
+        title="Runtime API"
+        icon="bolt"
+        href="/en/configurations/runtime-api"
+    >
+        Make dynamic configuration changes after initialization
+    </Card>
+    <Card
+        title="Examples"
+        icon="lightbulb"
+        href="/en/configurations/examples"
+    >
+        See complete configuration examples for different use cases
+    </Card>
+</CardGroup>

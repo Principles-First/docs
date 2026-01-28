@@ -1,0 +1,263 @@
+---
+title: "Audit Logging"
+description: "Comprehensive audit trails for compliance and security monitoring"
+---
+
+## Overview
+
+Moss provides comprehensive audit logging to help you meet compliance requirements and investigate security incidents. Every API request can be tracked, reviewed, and analyzed.
+
+---
+
+## What Gets Logged
+
+### Inbound Requests (SDK to Backend)
+
+| Field | Description |
+|-------|-------------|
+| Timestamp | When the request was received |
+| Application ID | Which application made the request |
+| User ID | The authenticated user |
+| Session ID | Associated chat session |
+| Endpoint | API endpoint called |
+| Request payload | Sanitized request body |
+| Response status | HTTP status code |
+| Duration | Request processing time |
+
+### Outbound Requests (Backend to External Services)
+
+| Field | Description |
+|-------|-------------|
+| Timestamp | When the request was made |
+| Target service | LLM provider, embedding API, storage |
+| Provider | Specific provider (OpenAI, Google, etc.) |
+| Model | Model used for the request |
+| Request summary | Sanitized request details |
+| Response status | Success/failure |
+| Token counts | For LLM requests |
+
+---
+
+## Sensitive Data Redaction
+
+All audit logs are automatically sanitized before storage:
+
+### Redacted Fields
+
+The following fields are automatically redacted:
+
+- `api_key`, `apiKey`
+- `authorization`
+- `password`
+- `secret`
+- `token`
+- `x-api-key`
+
+### Redaction Example
+
+```json
+// Original request
+{
+  "headers": {
+    "authorization": "Bearer eyJhbG...",
+    "x-api-key": "app_abc123"
+  },
+  "body": {
+    "query": "How do I reset my password?"
+  }
+}
+
+// Logged (sanitized)
+{
+  "headers": {
+    "authorization": "[REDACTED]",
+    "x-api-key": "[REDACTED]"
+  },
+  "body": {
+    "query": "How do I reset my password?"
+  }
+}
+```
+
+<Info>
+    Redaction is recursive - nested objects and arrays are also sanitized.
+</Info>
+
+---
+
+## Per-Application Control
+
+Audit logging can be enabled or disabled per application:
+
+### Dashboard Configuration
+
+Navigate to **Settings > Developer Options > Audit Logging** to enable or disable logging for your application.
+
+### Considerations
+
+| Audit Logging | Use Case |
+|---------------|----------|
+| **Enabled** | Compliance requirements, security-sensitive applications |
+| **Disabled** | High-volume applications where storage costs are a concern |
+
+<Tip>
+    We recommend enabling audit logging for all production applications,
+    especially those handling sensitive data.
+</Tip>
+
+---
+
+## Accessing Audit Logs
+
+### Dashboard Access
+
+View audit logs in the Dashboard under **Analytics > Audit Logs**.
+
+Features:
+- Filter by date range
+- Filter by user or session
+- Filter by endpoint or status
+- Export to CSV
+
+### API Access
+
+Query audit logs programmatically using the Audit API:
+
+```bash
+curl -X GET "https://api.viamoss.ai/v1/audit-logs" \
+  -H "Authorization: Bearer YOUR_AUDIT_API_KEY" \
+  -H "X-Application-Id: YOUR_APP_ID" \
+  -d "start_date=2024-01-01" \
+  -d "end_date=2024-01-31"
+```
+
+### Audit API Key
+
+A separate API key is used for audit log access:
+
+- **Isolated Access** - Audit key is separate from SDK API key
+- **Read-Only** - Cannot modify logs or other data
+- **Revocable** - Can be revoked independently
+
+---
+
+## Log Retention
+
+### Default Retention
+
+| Log Type | Retention Period |
+|----------|------------------|
+| API request logs | 90 days |
+| LLM call logs | 90 days |
+| Security events | 1 year |
+
+### Custom Retention
+
+Contact support for custom retention periods based on your compliance requirements.
+
+---
+
+## Use Cases
+
+### Compliance Reporting
+
+Generate reports for auditors:
+
+1. Filter logs by date range
+2. Export to CSV
+3. Include in compliance documentation
+
+### Security Investigation
+
+Investigate suspicious activity:
+
+1. Identify the user or session
+2. Review all related requests
+3. Check for anomalous patterns
+4. Export evidence for incident response
+
+### Performance Analysis
+
+Analyze API usage patterns:
+
+1. Review request durations
+2. Identify slow endpoints
+3. Track LLM token usage
+4. Optimize based on data
+
+### Cost Analysis
+
+Track LLM usage costs:
+
+1. Review token counts per model
+2. Identify high-usage sessions
+3. Optimize prompts and context
+
+---
+
+## Log Integrity
+
+### Immutability
+
+Audit logs are immutable once created:
+
+- Logs cannot be modified after creation
+- Logs cannot be deleted by application owners
+- Deletion only through data retention policies
+
+### Timestamps
+
+All timestamps are:
+
+- UTC normalized
+- Server-side generated
+- Cannot be client-specified
+
+---
+
+## Best Practices
+
+### Enable for Production
+
+Always enable audit logging for production applications to:
+
+- Meet compliance requirements
+- Enable incident investigation
+- Track usage patterns
+
+### Regular Review
+
+Periodically review audit logs for:
+
+- Unusual access patterns
+- Failed authentication attempts
+- Unexpected API usage
+
+### Secure API Keys
+
+Protect your Audit API key:
+
+- Store securely (not in code)
+- Rotate periodically
+- Monitor for unauthorized use
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card
+        title="Compliance"
+        icon="certificate"
+        href="/en/security/compliance"
+    >
+        GDPR, data deletion, and certifications
+    </Card>
+    <Card
+        title="Authentication"
+        icon="key"
+        href="/en/security/authentication"
+    >
+        Secure your SDK integration
+    </Card>
+</CardGroup>

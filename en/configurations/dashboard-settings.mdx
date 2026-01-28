@@ -1,0 +1,331 @@
+---
+title: "Dashboard Settings"
+description: "Configure application defaults through the Moss Dashboard"
+---
+
+## Overview
+
+The [Moss Dashboard](https://dashboard.viamoss.ai) provides a web interface for managing application-level settings. These settings serve as defaults that can be overridden by SDK initialization or runtime configuration.
+
+<Tip>
+    Dashboard settings are ideal for application-wide defaults, security
+    policies, and settings that should apply to all users.
+</Tip>
+
+---
+
+## Application Information
+
+View and manage your application's metadata and identity settings.
+
+### Application Name
+
+Your application's display name in the dashboard. This field is currently read-only.
+
+### Application ID
+
+Your unique application identifier. Use this when integrating the SDK.
+
+### Created Date
+
+When your application was created.
+
+### UI Language
+
+Controls the language displayed to end users in the SDK interface.
+
+**Default:** Auto (detects user's browser language)
+
+Navigate to **Settings > Application Information** and select from the Language dropdown.
+
+<Info>
+    When set to "Auto", Moss will automatically detect and use the user's
+    preferred browser language. This can be overridden via SDK initialization.
+</Info>
+
+---
+
+## General Settings
+
+Configure your application's core AI assistant features.
+
+### Enable Vision
+
+Allow the SDK to process and analyze screenshots and visual content. When enabled, the AI assistant can "see" the user's screen and provide more contextual guidance.
+
+**Default:** `true`
+
+Navigate to **Settings > General Settings > Core Features** and toggle "Enable Vision".
+
+**Use cases:**
+- Visual troubleshooting
+- UI element identification
+- Screenshot-based guidance
+
+<Tip>
+    Enable this feature if your users need help finding specific UI elements or
+    if you want the AI to provide visual context.
+</Tip>
+
+### Enable Session Replay
+
+Record and upload user sessions for replay in the dashboard. This allows you to review user interactions and debug issues.
+
+**Default:** `true`
+
+Navigate to **Settings > General Settings > Core Features** and toggle "Enable Session Replay".
+
+**What's recorded:**
+- User interactions (clicks, inputs, navigation)
+- DOM structure changes
+- Timestamps and session metadata
+
+<Warning>
+    Session recordings may contain sensitive user data. Ensure you have
+    appropriate privacy policies and user consent.
+</Warning>
+
+### Enable Screen History for AI
+
+Include user action history (clicks, inputs, navigation) and DOM changes in the AI's context. This provides the AI with a richer understanding of the user's journey.
+
+**Default:** `true`
+
+Navigate to **Settings > General Settings > Core Features** and toggle "Enable Screen History for AI".
+
+**Benefits:**
+- More contextual AI responses
+- Better understanding of user intent
+- Improved multi-step guidance
+
+### AI Assistant Instructions
+
+Provide custom instructions to help the AI assistant navigate your application or provide context not available through documentation.
+
+**Default:** Empty
+**Maximum:** 30,000 characters
+
+<Note>
+    This setting is **Dashboard and API only** - it cannot be configured via SDK
+    initialization.
+</Note>
+
+Navigate to **Settings > General Settings > AI Assistant Instructions** and enter your custom instructions in the textarea.
+
+**What to include:**
+- Specific navigation patterns unique to your application
+- Important UI context or workflow information
+- Special considerations or edge cases
+- Terminology or concepts specific to your domain
+
+**Example:**
+
+```
+When users ask about 'dashboard', always guide them to the Analytics
+section first, not the Overview. The main navigation menu collapses
+on mobile devices and requires clicking the hamburger icon in the
+top-left corner.
+```
+
+<Tip>
+    Use clear, concise language. The AI will incorporate these instructions when
+    helping users.
+</Tip>
+
+---
+
+## User Experience
+
+Configure planning features and session behavior.
+
+### Planning Configuration
+
+Enable AI-powered multi-step planning for complex user tasks.
+
+#### Enable Planning
+
+Turn on/off the planning feature entirely.
+
+**Default:** `false`
+
+Navigate to **Settings > User Experience > Planning Configuration** and toggle "Enable Planning".
+
+When enabled, the AI can break down complex tasks into multiple steps and execute them sequentially.
+
+#### Maximum Steps
+
+The maximum number of steps allowed in a single plan.
+
+**Default:** `10`
+**Range:** 1-20
+
+<Info>
+    Higher values allow for more complex multi-step tasks but may take longer to
+    complete.
+</Info>
+
+#### Allow User Skip
+
+Allow users to skip individual steps in a plan.
+
+**Default:** Enabled
+
+When enabled, users can choose to skip steps they've already completed or want to handle manually.
+
+#### Show Plan Overview
+
+Display the full plan overview to users before execution.
+
+**Default:** Enabled
+
+Shows users what the AI plans to do before taking action, improving transparency and trust.
+
+### Session Behavior
+
+Configure how user sessions are managed and timed out.
+
+#### Inactivity Timeout
+
+Time in minutes before an inactive session is considered expired.
+
+**Default:** 30 minutes
+
+After this period of inactivity, a new session will be created for the user.
+
+#### Maximum Session Age
+
+Maximum session duration in hours, regardless of activity.
+
+**Default:** 2 hours
+
+Sessions will automatically expire after this duration, even if the user is active.
+
+#### Show Notifications
+
+Display notifications when starting new sessions.
+
+**Default:** Enabled
+
+When enabled, users will see a notification when a new session begins.
+
+---
+
+## Security
+
+Control access and security settings for your SDK.
+
+### Domain Access Control
+
+Restrict which domains can use your SDK to prevent unauthorized usage.
+
+**Default:** Empty (all domains allowed)
+
+<Note>This setting is **Dashboard only**.</Note>
+
+**How it works:**
+- If the list is empty, the SDK works on any domain
+- If domains are specified, the SDK only works on those domains
+- Wildcards are not supported
+
+**Example allowed domains:**
+
+```
+app.example.com
+staging.example.com
+localhost:3000
+```
+
+<Warning>
+    Be careful when restricting domains. Make sure to include all environments
+    where your application runs (production, staging, development).
+</Warning>
+
+---
+
+## Developer Options
+
+Advanced settings for developers and technical configuration.
+
+### API Keys
+
+Manage API keys for SDK authentication.
+
+<Note>This setting is **Dashboard only**.</Note>
+
+#### Current API Key
+
+Your active production API key. The full key is only shown once when generated.
+
+<Warning>
+    Your API key is sensitive. Store it securely and never commit it to version
+    control.
+</Warning>
+
+#### Regenerate API Key
+
+Create a new API key and invalidate the old one.
+
+<Danger>
+    Regenerating your API key will immediately invalidate the old key. Any
+    applications using the old key will stop working.
+</Danger>
+
+### Vector Store Configuration
+
+Choose which documentation system to use for RAG (Retrieval-Augmented Generation).
+
+<Note>This setting is **Dashboard only**.</Note>
+
+**Default:** V1 System (for new applications)
+
+**Options:**
+- **Legacy System:** Uses documentation_records table
+- **V1 System (New):** Uses three-tier documentation system (sources, pages, chunks)
+
+<Info>
+    V1 provides better organization with sources, pages, and chunks. It also
+    preserves full page content.
+</Info>
+
+**Before switching:**
+- Ensure your documentation is ingested into the new system
+- Test RAG search results after switching
+- You can switch back anytime if needed
+
+### Danger Zone
+
+Irreversible actions that affect your application.
+
+<Note>This setting is **Dashboard only**.</Note>
+
+#### Delete Application
+
+Permanently delete your application and all associated data.
+
+**Status:** Coming Soon
+
+<Danger>
+    When enabled, this action will permanently remove all data including
+    sessions, users, and knowledge base documents. This cannot be undone.
+</Danger>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card
+        title="SDK Options"
+        icon="code"
+        href="/en/configurations/sdk-options"
+    >
+        Override Dashboard settings in your application code
+    </Card>
+    <Card
+        title="Runtime API"
+        icon="bolt"
+        href="/en/configurations/runtime-api"
+    >
+        Make dynamic configuration changes
+    </Card>
+</CardGroup>

@@ -1,0 +1,106 @@
+---
+title: "Configuration Overview"
+description: "Understanding Moss configuration options and priority system"
+---
+
+## Introduction
+
+Moss SDK can be configured in multiple ways to fit your application's needs. This flexibility allows you to set sensible defaults while giving developers fine-grained control per user or session.
+
+### Configuration Methods
+
+| Method | Use Case | Priority |
+|--------|----------|----------|
+| **Dashboard Settings** | Application-wide defaults, security policies | Lowest |
+| **SDK Initialization** | Per-deployment customization, environment-specific settings | Medium |
+| **Runtime API** | Dynamic changes based on user actions or conditions | Highest |
+
+## Configuration Priority
+
+When the same setting is configured in multiple places, Moss uses this priority order (highest to lowest):
+
+1. **Runtime API calls** - `window.Moss.configure()`
+2. **SDK initialization parameters** - Script tag or constructor options
+3. **Dashboard settings** - Application-level defaults
+
+<Info>
+    This priority system allows you to set sensible defaults in the Dashboard
+    while giving developers the ability to override specific settings in code.
+</Info>
+
+### Example: Priority in Action
+
+```javascript
+// Dashboard setting: language = 'en'
+// SDK initialization overrides it:
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    language: 'ko'  // This takes precedence over Dashboard
+})
+
+// Runtime API overrides both:
+window.Moss.configure({ language: 'en' })  // This wins
+```
+
+## Quick Reference
+
+### Dashboard-Only Settings
+
+These settings can only be configured through the Dashboard:
+
+- AI Assistant Instructions
+- API Keys
+- Domain Access Control
+- Vector Store Configuration
+- Application deletion
+
+### SDK-Configurable Settings
+
+These settings can be set in Dashboard and overridden via SDK:
+
+| Setting | Dashboard | SDK Init | Runtime |
+|---------|-----------|----------|---------|
+| Language | Yes | Yes | Yes |
+| Enable Vision | Yes | Yes | No |
+| Session Recording | Yes | Yes | Yes |
+| Screen History | Yes | Yes | Yes |
+| Planning | Yes | Yes | Yes |
+| Session Timeouts | Yes | Yes | No |
+| Screenshot Mode | Yes | Yes | No |
+| Log Level | Yes | Yes | No |
+| Debug Mode | Yes | Yes | No |
+| DOM Stability | Yes | Yes | No |
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card
+        title="Dashboard Settings"
+        icon="browser"
+        href="/en/configurations/dashboard-settings"
+    >
+        Configure application defaults through the web UI
+    </Card>
+    <Card
+        title="SDK Options"
+        icon="code"
+        href="/en/configurations/sdk-options"
+    >
+        Customize behavior in your application code
+    </Card>
+    <Card
+        title="Runtime API"
+        icon="bolt"
+        href="/en/configurations/runtime-api"
+    >
+        Make dynamic configuration changes
+    </Card>
+    <Card
+        title="Examples"
+        icon="lightbulb"
+        href="/en/configurations/examples"
+    >
+        See complete configuration examples
+    </Card>
+</CardGroup>

@@ -1,0 +1,266 @@
+---
+title: "Data Protection"
+description: "How Moss protects your data through encryption, validation, and secure storage"
+---
+
+## Overview
+
+Moss implements multiple layers of data protection to ensure your information remains secure throughout its lifecycle.
+
+---
+
+## Encryption
+
+### In Transit
+
+All data transmitted to and from Moss is encrypted:
+
+- **TLS 1.2+** - All API endpoints require HTTPS
+- **Certificate Validation** - Strict certificate verification
+- **HSTS** - HTTP Strict Transport Security headers enforced
+
+<Info>
+    HTTP requests are automatically redirected to HTTPS. Unencrypted connections
+    are never accepted for API traffic.
+</Info>
+
+### At Rest
+
+Data stored in Moss databases is protected:
+
+- **Database Encryption** - PostgreSQL with encryption at rest
+- **Credential Hashing** - All secrets stored as cryptographic hashes
+- **Secure Key Storage** - Encryption keys managed separately from data
+
+---
+
+## Input Validation
+
+All API inputs are validated before processing:
+
+### Schema Validation
+
+Every API endpoint uses Pydantic schema validation:
+
+```python
+class SessionRequest(BaseModel):
+    user_id: str
+    application_id: str
+    metadata: Optional[dict] = None
+
+    @validator('user_id')
+    def validate_user_id(cls, v):
+        if len(v) > 256:
+            raise ValueError('user_id too long')
+        return v
+```
+
+### Validation Rules
+
+| Input Type | Validation |
+|------------|------------|
+| String fields | Length limits, format validation |
+| IDs | UUID format verification |
+| Enums | Allowed values only |
+| Nested objects | Recursive validation |
+
+### Rejection Behavior
+
+Invalid requests receive clear error responses:
+
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "user_id"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    }
+  ]
+}
+```
+
+---
+
+## Sensitive Data Handling
+
+### Automatic Redaction
+
+Moss automatically sanitizes sensitive data before logging:
+
+**Redacted Fields:**
+- `api_key`, `apiKey`
+- `authorization`
+- `password`
+- `secret`
+- `token`
+- `x-api-key`
+
+**How It Works:**
+
+```python
+# Before logging
+{
+    "user_id": "user-123",
+    "api_key": "app_abc123xyz..."
+}
+
+# After sanitization
+{
+    "user_id": "user-123",
+    "api_key": "[REDACTED]"
+}
+```
+
+### Recursive Sanitization
+
+Redaction applies to nested objects and arrays:
+
+```python
+{
+    "config": {
+        "auth": {
+            "token": "[REDACTED]"  # Nested fields also sanitized
+        }
+    }
+}
+```
+
+---
+
+## Credential Storage
+
+### API Keys
+
+API keys are never stored in plaintext:
+
+| Stage | Protection |
+|-------|------------|
+| Generation | Cryptographically random (`secrets.token_urlsafe`) |
+| Storage | SHA-256 hash |
+| Comparison | Constant-time comparison (timing-safe) |
+| Display | Shown once at creation, never retrievable |
+
+### JWT Signing Keys
+
+JWT secrets receive enhanced protection:
+
+| Stage | Protection |
+|-------|------------|
+| Generation | 256-bit entropy (`secrets.token_urlsafe(32)`) |
+| Storage | Argon2id hash (recommended) |
+| Rotation | Support for multiple active keys |
+| Revocation | Scheduled revocation with grace period |
+
+### Password-Like Secrets
+
+All password-equivalent credentials use:
+
+- **Argon2id** - Memory-hard hashing algorithm
+- **Unique Salts** - Per-credential random salts
+- **Timing-Safe Comparison** - Prevents timing attacks
+
+---
+
+## Secure Defaults
+
+Moss uses secure defaults that require explicit opt-out:
+
+### Production Safeguards
+
+| Setting | Production Behavior |
+|---------|---------------------|
+| `SKIP_SDK_AUTH` | Ignored (always requires auth) |
+| `SKIP_CLERK_VERIFICATION` | Ignored (always verifies) |
+| Debug endpoints | Disabled |
+| Verbose logging | Disabled |
+
+### Fail-Closed Design
+
+```python
+def should_skip_sdk_auth(self) -> bool:
+    # Production ALWAYS requires authentication
+    if self.app_env == AppEnvironment.PRODUCTION:
+        return False  # Cannot be overridden
+
+    # Development requires explicit opt-in
+    return self.skip_sdk_auth is True
+```
+
+---
+
+## Domain Whitelisting
+
+Restrict SDK usage to approved domains:
+
+### Configuration
+
+Set allowed domains in the Dashboard under **Settings > Security**:
+
+```
+app.example.com
+staging.example.com
+localhost:3000
+```
+
+### Enforcement
+
+| Scenario | Behavior |
+|----------|----------|
+| Empty whitelist | SDK works on any domain |
+| Whitelist configured | SDK only works on listed domains |
+| Unlisted domain | SDK initialization fails |
+
+<Warning>
+    Remember to include all environments (production, staging, development) in
+    your whitelist.
+</Warning>
+
+---
+
+## Data Minimization
+
+Moss follows data minimization principles:
+
+### Collected Data
+
+| Data Type | Purpose | Retention |
+|-----------|---------|-----------|
+| User ID | Session identification | Configurable |
+| Screenshots | Visual context for AI | Session duration |
+| Chat messages | Conversation history | Configurable |
+| Session recordings | Replay and debugging | Configurable |
+
+### User Control
+
+Users can control data collection via SDK configuration:
+
+```javascript
+window.Moss.init({
+    applicationId: 'YOUR_APP_ID',
+    userId: 'USER_ID',
+    enableSessionRecording: false,      // Disable recordings
+    enableScreenHistoryRecording: false // Disable history
+})
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+    <Card
+        title="Audit Logging"
+        icon="clipboard-list"
+        href="/en/security/audit-logging"
+    >
+        Track and review all system activity
+    </Card>
+    <Card
+        title="Compliance"
+        icon="certificate"
+        href="/en/security/compliance"
+    >
+        GDPR, data deletion, and certifications
+    </Card>
+</CardGroup>
