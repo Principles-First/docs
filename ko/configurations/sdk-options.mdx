@@ -1,14 +1,14 @@
 ---
 title: "SDK 옵션"
-description: "SDK 초기화 매개변수를 통한 Moss 동작 구성"
+description: "AgentProvider config를 통한 Moss 동작 구성"
 ---
 
 ## 개요
 
-SDK 초기화 옵션을 사용하면 애플리케이션 코드에서 직접 Moss 동작을 사용자 정의할 수 있습니다. 이러한 설정은 지정 시 **대시보드 기본값을 재정의**하여 개발자에게 배포, 환경 또는 사용자 세그먼트별로 세밀한 제어를 제공합니다.
+SDK 설정 옵션을 사용하면 애플리케이션 코드에서 직접 Moss 동작을 사용자 정의할 수 있습니다. 이러한 설정은 지정 시 **대시보드 기본값을 재정의**하여 개발자에게 배포, 환경 또는 사용자 세그먼트별로 세밀한 제어를 제공합니다.
 
 <Info>
-    **우선순위 알림:** SDK 초기화 옵션은 대시보드 설정보다 우선합니다.
+    **우선순위 알림:** SDK 설정 옵션은 대시보드 설정보다 우선합니다.
     코드에서 옵션을 구성하면 대시보드에서 설정한 값을 재정의합니다. 이를
     통해 개발자는 대시보드 설정을 기본값으로 사용하면서 배포별로 동작을
     사용자 정의할 수 있습니다.
@@ -18,19 +18,27 @@ SDK 초기화 옵션을 사용하면 애플리케이션 코드에서 직접 Moss
 
 ## 필수 옵션
 
-SDK를 초기화할 때 이러한 옵션을 제공해야 합니다:
+`AgentProvider` config에 다음 옵션을 제공해야 합니다:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',  // 필수: 애플리케이션 ID
-    userId: 'USER_ID'              // 필수: 고유 사용자 식별자
-})
+```tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 | 옵션 | 타입 | 설명 |
 |------|------|------|
+| `apiUrl` | `string` | Moss API 엔드포인트 URL |
 | `applicationId` | `string` | 대시보드의 고유 애플리케이션 ID |
 | `userId` | `string` | 현재 사용자의 고유 식별자 |
+| `getJwt` | `() => Promise<string>` | JWT 토큰을 반환하는 함수 |
 
 <Warning>
     `userId`는 사용자의 안정적인 식별자여야 합니다. PII(이메일, 이름)를
@@ -47,12 +55,16 @@ SDK 동작을 사용자 정의하는 데 자주 사용되는 옵션입니다:
 
 SDK 인터페이스의 UI 언어를 설정합니다.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    language: 'ko'  // 'en', 'ko' 또는 자동 감지를 위해 undefined
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  language: 'ko',  // 'en', 'ko' 또는 자동 감지를 위해 undefined
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `undefined` (브라우저 언어 자동 감지)
@@ -66,12 +78,16 @@ window.Moss.init({
 
 스크린샷 분석 기능을 활성화 또는 비활성화합니다.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    useVision: true  // 시각적 컨텍스트 활성화
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  useVision: true,  // 시각적 컨텍스트 활성화
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `true` (대시보드에서)
@@ -80,12 +96,16 @@ window.Moss.init({
 
 사용자 세션이 리플레이를 위해 녹화되는지 여부를 제어합니다.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    enableSessionRecording: false  // 개인정보에 민감한 사용자를 위해 비활성화
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  enableSessionRecording: false,  // 개인정보에 민감한 사용자를 위해 비활성화
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `true` (대시보드에서)
@@ -94,12 +114,16 @@ window.Moss.init({
 
 AI 컨텍스트에 사용자 액션 히스토리를 포함합니다.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    enableScreenHistoryRecording: true
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  enableScreenHistoryRecording: true,
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `true` (대시보드에서)
@@ -110,17 +134,21 @@ window.Moss.init({
 
 다단계 플래닝 기능을 구성합니다:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    planning: {
-        enabled: true,           // 플래닝 기능 활성화
-        maxSteps: 15,           // 플랜당 최대 단계 (1-20)
-        allowUserSkip: true,    // 단계 건너뛰기 허용
-        showPlanOverview: true  // 실행 전 플랜 표시
-    }
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  planning: {
+    enabled: true,
+    maxSteps: 15,
+    allowUserSkip: true,
+    showPlanOverview: true,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 | 옵션 | 타입 | 기본값 | 설명 |
@@ -136,16 +164,20 @@ window.Moss.init({
 
 세션 관리 동작을 구성합니다:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    sessionConfig: {
-        inactivityTimeout: 60,   // 타임아웃까지의 분
-        maxSessionAge: 4,        // 강제 만료까지의 시간
-        showNotification: true   // 세션 알림 표시
-    }
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  sessionConfig: {
+    inactivityTimeout: 60,
+    maxSessionAge: 4,
+    showNotification: true,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 | 옵션 | 타입 | 기본값 | 설명 |
@@ -162,12 +194,16 @@ window.Moss.init({
 
 ### 스크린샷 모드
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    screenshotMode: 'viewport'  // 'fullpage' 또는 'viewport'
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  screenshotMode: 'viewport',  // 'fullpage' 또는 'viewport'
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `'fullpage'`
@@ -184,12 +220,16 @@ window.Moss.init({
 
 ### 로그 레벨
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    logLevel: 'DEBUG'  // 'ERROR', 'WARN', 'INFO', 'DEBUG'
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  logLevel: 'DEBUG',  // 'ERROR', 'WARN', 'INFO', 'DEBUG'
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `'INFO'`
@@ -198,12 +238,16 @@ window.Moss.init({
 
 ### 디버그 모드
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    debugMode: true
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  debugMode: true,
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `false`
@@ -212,12 +256,16 @@ window.Moss.init({
 
 ### DOM 대상 셀렉터
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    observeTargetSelector: '#main-content'
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  observeTargetSelector: '#main-content',
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **기본값:** `'body'`
@@ -228,25 +276,29 @@ window.Moss.init({
 
 SDK가 페이지가 안정화되기를 기다리는 방식을 구성합니다:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    stability: {
-        maxTotalWaitMs: 15000,
-        layers: {
-            networkIdle: true,
-            domMutations: true,
-            loadingIndicators: false,
-            layoutShift: false,
-            browserIdle: true,
-            finalFrame: true
-        },
-        domMutations: {
-            quietPeriodMs: 1000  // 1초 동안 DOM 정지 대기
-        }
-    }
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  stability: {
+    maxTotalWaitMs: 15000,
+    layers: {
+      networkIdle: true,
+      domMutations: true,
+      loadingIndicators: false,
+      layoutShift: false,
+      browserIdle: true,
+      finalFrame: true,
+    },
+    domMutations: {
+      quietPeriodMs: 1000,
+    },
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 <Tip>
@@ -262,54 +314,56 @@ SDK 설정을 위한 전체 TypeScript 인터페이스입니다:
 
 ```typescript
 interface MossConfig {
-    // 필수
-    applicationId: string;
-    userId: string;
+  // 필수
+  apiUrl: string;
+  applicationId: string;
+  userId: string;
+  getJwt: () => Promise<string>;
 
-    // 애플리케이션 기능
-    useVision?: boolean;
-    language?: 'en' | 'ko';
+  // 애플리케이션 기능
+  useVision?: boolean;
+  language?: 'en' | 'ko';
 
-    // 녹화 및 히스토리
-    enableSessionRecording?: boolean;
-    enableScreenHistoryRecording?: boolean;
+  // 녹화 및 히스토리
+  enableSessionRecording?: boolean;
+  enableScreenHistoryRecording?: boolean;
 
-    // 플래닝 설정
-    planning?: {
-        enabled?: boolean;
-        maxSteps?: number;
-        allowUserSkip?: boolean;
-        showPlanOverview?: boolean;
+  // 플래닝 설정
+  planning?: {
+    enabled?: boolean;
+    maxSteps?: number;
+    allowUserSkip?: boolean;
+    showPlanOverview?: boolean;
+  };
+
+  // 세션 관리
+  sessionConfig?: {
+    inactivityTimeout?: number;
+    maxSessionAge?: number;
+    showNotification?: boolean;
+  };
+
+  // 기술 설정
+  logLevel?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+  debugMode?: boolean;
+  screenshotMode?: 'fullpage' | 'viewport';
+  observeTargetSelector?: string;
+
+  // DOM 안정성
+  stability?: {
+    maxTotalWaitMs?: number;
+    layers?: {
+      networkIdle?: boolean;
+      domMutations?: boolean;
+      loadingIndicators?: boolean;
+      layoutShift?: boolean;
+      browserIdle?: boolean;
+      finalFrame?: boolean;
     };
-
-    // 세션 관리
-    sessionConfig?: {
-        inactivityTimeout?: number;
-        maxSessionAge?: number;
-        showNotification?: boolean;
+    domMutations?: {
+      quietPeriodMs?: number;
     };
-
-    // 기술 설정
-    logLevel?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
-    debugMode?: boolean;
-    screenshotMode?: 'fullpage' | 'viewport';
-    observeTargetSelector?: string;
-
-    // DOM 안정성
-    stability?: {
-        maxTotalWaitMs?: number;
-        layers?: {
-            networkIdle?: boolean;
-            domMutations?: boolean;
-            loadingIndicators?: boolean;
-            layoutShift?: boolean;
-            browserIdle?: boolean;
-            finalFrame?: boolean;
-        };
-        domMutations?: {
-            quietPeriodMs?: number;
-        };
-    };
+  };
 }
 ```
 
@@ -336,17 +390,17 @@ interface MossConfig {
 
 <CardGroup cols={2}>
     <Card
-        title="런타임 API"
-        icon="bolt"
-        href="/ko/configurations/runtime-api"
-    >
-        초기화 후 동적 설정 변경하기
-    </Card>
-    <Card
         title="예시"
         icon="lightbulb"
         href="/ko/configurations/examples"
     >
         다양한 사용 사례에 대한 전체 설정 예시 보기
+    </Card>
+    <Card
+        title="대시보드 설정"
+        icon="browser"
+        href="/ko/configurations/dashboard-settings"
+    >
+        대시보드에서 애플리케이션 기본값 구성
     </Card>
 </CardGroup>

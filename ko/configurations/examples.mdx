@@ -5,7 +5,7 @@ description: "일반적인 사용 사례를 위한 전체 설정 예시"
 
 ## 개요
 
-이 페이지는 다양한 사용 사례에 대한 완전한 복사-붙여넣기 가능한 설정 예시를 제공합니다. 각 예시에는 SDK 초기화와 관련 런타임 설정이 모두 포함되어 있습니다.
+이 페이지는 `AgentProvider` 컴포넌트를 사용하는 다양한 사용 사례에 대한 완전한 복사-붙여넣기 가능한 설정 예시를 제공합니다.
 
 ---
 
@@ -13,11 +13,17 @@ description: "일반적인 사용 사례를 위한 전체 설정 예시"
 
 가장 간단한 시작 설정:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID'
-})
+```tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 모든 대시보드 기본값을 사용합니다. 빠른 테스트나 대시보드 설정이 요구 사항을 충족하는 경우에 적합합니다.
@@ -28,32 +34,36 @@ window.Moss.init({
 
 포괄적인 지원이 필요한 사용자를 위한 전체 기능 설정:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'premium-user-123',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'premium-user-123',
+  getJwt: () => fetchMossToken(),
 
-    // 모든 기능 활성화
-    useVision: true,
-    enableSessionRecording: true,
-    enableScreenHistoryRecording: true,
-    language: 'ko',
+  // 모든 기능 활성화
+  useVision: true,
+  enableSessionRecording: true,
+  enableScreenHistoryRecording: true,
+  language: 'ko',
 
-    // 고급 플래닝
-    planning: {
-        enabled: true,
-        maxSteps: 15,
-        allowUserSkip: true,
-        showPlanOverview: true
-    },
+  // 고급 플래닝
+  planning: {
+    enabled: true,
+    maxSteps: 15,
+    allowUserSkip: true,
+    showPlanOverview: true,
+  },
 
-    // 프리미엄 사용자를 위한 확장된 세션
-    sessionConfig: {
-        inactivityTimeout: 60,
-        maxSessionAge: 4,
-        showNotification: true
-    }
-})
+  // 프리미엄 사용자를 위한 확장된 세션
+  sessionConfig: {
+    inactivityTimeout: 60,
+    maxSessionAge: 4,
+    showNotification: true,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 ---
@@ -62,26 +72,30 @@ window.Moss.init({
 
 개발 및 디버깅에 최적화된 설정:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'dev-user',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'dev-user',
+  getJwt: () => fetchMossToken(),
 
-    // 디버그 설정
-    debugMode: true,
-    logLevel: 'DEBUG',
+  // 디버그 설정
+  debugMode: true,
+  logLevel: 'DEBUG',
 
-    // 빠른 테스트를 위한 최소 안정성 검사
-    stability: {
-        layers: {
-            networkIdle: false,
-            browserIdle: false
-        }
+  // 빠른 테스트를 위한 최소 안정성 검사
+  stability: {
+    layers: {
+      networkIdle: false,
+      browserIdle: false,
     },
+  },
 
-    // 더 빠른 테스트를 위한 뷰포트 스크린샷
-    screenshotMode: 'viewport'
-})
+  // 더 빠른 테스트를 위한 뷰포트 스크린샷
+  screenshotMode: 'viewport',
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 <Tip>
@@ -95,42 +109,26 @@ window.Moss.init({
 
 개인정보에 민감한 사용자를 위한 최소 데이터 수집:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'privacy-user-456',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'privacy-user-456',
+  getJwt: () => fetchMossToken(),
 
-    // 최소 데이터 수집
-    enableSessionRecording: false,
-    enableScreenHistoryRecording: false,
-    useVision: true,  // 여전히 유용하지만 저장되는 데이터 감소
+  // 최소 데이터 수집
+  enableSessionRecording: false,
+  enableScreenHistoryRecording: false,
+  useVision: true,  // 여전히 유용하지만 저장되는 데이터 감소
 
-    // 짧은 세션
-    sessionConfig: {
-        inactivityTimeout: 15,
-        maxSessionAge: 1
-    }
-})
-```
-
-### 런타임 개인정보 토글 포함
-
-```javascript
-// 녹화가 활성화된 초기 설정
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    enableSessionRecording: true,
-    enableScreenHistoryRecording: true
-})
-
-// 개인정보 토글 핸들러
-function setPrivacyMode(enabled) {
-    window.Moss.configure({
-        enableSessionRecording: !enabled,
-        enableScreenHistoryRecording: !enabled
-    })
-}
+  // 짧은 세션
+  sessionConfig: {
+    inactivityTimeout: 15,
+    maxSessionAge: 1,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 ---
@@ -139,137 +137,126 @@ function setPrivacyMode(enabled) {
 
 구독 수준에 따른 다양한 설정:
 
-```javascript
+```tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
 const subscriptionConfigs = {
-    free: {
-        planning: { enabled: false },
-        sessionConfig: {
-            inactivityTimeout: 15,
-            maxSessionAge: 1
-        }
+  free: {
+    planning: { enabled: false },
+    sessionConfig: {
+      inactivityTimeout: 15,
+      maxSessionAge: 1,
     },
-    pro: {
-        planning: {
-            enabled: true,
-            maxSteps: 10,
-            allowUserSkip: true,
-            showPlanOverview: true
-        },
-        sessionConfig: {
-            inactivityTimeout: 30,
-            maxSessionAge: 2
-        }
+  },
+  pro: {
+    planning: {
+      enabled: true,
+      maxSteps: 10,
+      allowUserSkip: true,
+      showPlanOverview: true,
     },
-    enterprise: {
-        planning: {
-            enabled: true,
-            maxSteps: 20,
-            allowUserSkip: true,
-            showPlanOverview: true
-        },
-        sessionConfig: {
-            inactivityTimeout: 60,
-            maxSessionAge: 8
-        }
-    }
-}
+    sessionConfig: {
+      inactivityTimeout: 30,
+      maxSessionAge: 2,
+    },
+  },
+  enterprise: {
+    planning: {
+      enabled: true,
+      maxSteps: 20,
+      allowUserSkip: true,
+      showPlanOverview: true,
+    },
+    sessionConfig: {
+      inactivityTimeout: 60,
+      maxSessionAge: 8,
+    },
+  },
+};
 
-function initMossForUser(user) {
-    const tierConfig = subscriptionConfigs[user.tier] || subscriptionConfigs.free
+function MossAssistant({ user }) {
+  const tierConfig = subscriptionConfigs[user.tier] || subscriptionConfigs.free;
 
-    window.Moss.init({
-        applicationId: 'YOUR_APP_ID',
-        userId: user.id,
-        ...tierConfig
-    })
+  return (
+    <AgentProvider config={{
+      apiUrl: 'https://clippy-api.viamoss.ai',
+      applicationId: 'YOUR_APP_ID',
+      userId: user.id,
+      getJwt: () => fetchMossToken(),
+      ...tierConfig,
+    }}>
+      <AssistantButton />
+    </AgentProvider>
+  );
 }
 ```
 
 ---
 
-## 싱글 페이지 애플리케이션 (SPA)
+## Next.js App Router
 
-React, Vue 또는 Angular 애플리케이션을 위한 설정:
+Next.js App Router를 위한 전체 설정:
 
-<Tabs>
-  <Tab title="React">
-    ```tsx
-    import { useEffect } from 'react'
-    import { useAuth } from './auth'  // 인증 훅
+```tsx app/layout.tsx
+import { MossAssistant } from '@/components/moss-assistant';
+import { auth } from '@/lib/auth';
 
-    function App() {
-        const { user, isAuthenticated } = useAuth()
+export default async function RootLayout({ children }) {
+  const session = await auth();
 
-        useEffect(() => {
-            if (isAuthenticated && user) {
-                window.Moss.init({
-                    applicationId: process.env.REACT_APP_MOSS_APP_ID,
-                    userId: user.id,
-                    language: user.preferredLanguage,
-                    planning: {
-                        enabled: user.subscription === 'pro'
-                    }
-                })
-            }
-        }, [isAuthenticated, user])
+  return (
+    <html>
+      <body>
+        {children}
+        {session?.user && <MossAssistant userId={session.user.id} />}
+      </body>
+    </html>
+  );
+}
+```
 
-        return <div>Your App</div>
-    }
-    ```
-  </Tab>
-  <Tab title="Vue">
-    ```vue
-    <script setup>
-    import { watch } from 'vue'
-    import { useAuth } from './composables/auth'
+```tsx components/moss-assistant.tsx
+'use client';
 
-    const { user, isAuthenticated } = useAuth()
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
 
-    watch([isAuthenticated, user], ([auth, u]) => {
-        if (auth && u) {
-            window.Moss.init({
-                applicationId: import.meta.env.VITE_MOSS_APP_ID,
-                userId: u.id,
-                language: u.preferredLanguage,
-                planning: {
-                    enabled: u.subscription === 'pro'
-                }
-            })
-        }
-    }, { immediate: true })
-    </script>
-    ```
-  </Tab>
-  <Tab title="Angular">
-    ```typescript
-    import { Component, OnInit } from '@angular/core'
-    import { AuthService } from './auth.service'
+export function MossAssistant({ userId }: { userId: string }) {
+  return (
+    <AgentProvider config={{
+      apiUrl: 'https://clippy-api.viamoss.ai',
+      applicationId: process.env.NEXT_PUBLIC_MOSS_APP_ID!,
+      userId,
+      getJwt: async () => {
+        const res = await fetch('/api/moss-token');
+        const data = await res.json();
+        return data.token;
+      },
+    }}>
+      <AssistantButton />
+    </AgentProvider>
+  );
+}
+```
 
-    @Component({
-        selector: 'app-root',
-        template: '<router-outlet></router-outlet>'
-    })
-    export class AppComponent implements OnInit {
-        constructor(private auth: AuthService) {}
+```typescript app/api/moss-token/route.ts
+import jwt from 'jsonwebtoken';
+import { auth } from '@/lib/auth';
 
-        ngOnInit() {
-            this.auth.user$.subscribe(user => {
-                if (user) {
-                    (window as any).Moss.init({
-                        applicationId: environment.mossAppId,
-                        userId: user.id,
-                        language: user.preferredLanguage,
-                        planning: {
-                            enabled: user.subscription === 'pro'
-                        }
-                    })
-                }
-            })
-        }
-    }
-    ```
-  </Tab>
-</Tabs>
+export async function GET() {
+  const session = await auth();
+  if (!session?.user) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const token = jwt.sign(
+    { sub: session.user.id, app: process.env.MOSS_APP_ID },
+    process.env.MOSS_JWT_SECRET!,
+    { expiresIn: '1h' }
+  );
+
+  return Response.json({ token });
+}
+```
 
 ---
 
@@ -277,31 +264,35 @@ React, Vue 또는 Angular 애플리케이션을 위한 설정:
 
 최소 오버헤드에 최적화:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
 
-    // 스크린샷 처리 감소
-    screenshotMode: 'viewport',
+  // 스크린샷 처리 감소
+  screenshotMode: 'viewport',
 
-    // 최소 로깅
-    logLevel: 'ERROR',
-    debugMode: false,
+  // 최소 로깅
+  logLevel: 'ERROR',
+  debugMode: false,
 
-    // 빠른 안정성 검사
-    stability: {
-        maxTotalWaitMs: 5000,
-        layers: {
-            networkIdle: true,
-            domMutations: true,
-            loadingIndicators: false,  // 로딩 인디케이터 감지 건너뛰기
-            layoutShift: false,        // 레이아웃 시프트 감지 건너뛰기
-            browserIdle: false,        // requestIdleCallback 건너뛰기
-            finalFrame: true
-        }
-    }
-})
+  // 빠른 안정성 검사
+  stability: {
+    maxTotalWaitMs: 5000,
+    layers: {
+      networkIdle: true,
+      domMutations: true,
+      loadingIndicators: false,
+      layoutShift: false,
+      browserIdle: false,
+      finalFrame: true,
+    },
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 ---
@@ -316,17 +307,11 @@ window.Moss.init({
 - 모든 사용자에게 적용되는 AI 지침 관리
 - 거의 변경되지 않는 설정
 
-**SDK 초기화 사용 시기:**
+**SDK 설정 사용 시기:**
 - 사용자별 사용자 정의가 필요한 경우
 - 환경에 따른 설정 (개발/스테이징/프로덕션)
 - 다른 사용자 등급에 다른 설정이 필요한 경우
 - 기존 사용자 기본 설정과 통합
-
-**런타임 설정 사용 시기:**
-- 사용자 작업에 대한 응답 (개인정보 토글)
-- 기능 플래그 또는 A/B 테스트 구현
-- 세션별 재정의
-- 조건에 따른 동적 조정
 
 ### 성능 팁
 
