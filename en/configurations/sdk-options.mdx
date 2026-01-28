@@ -1,14 +1,14 @@
 ---
 title: "SDK Options"
-description: "Configure Moss behavior through SDK initialization parameters"
+description: "Configure Moss behavior through AgentProvider config"
 ---
 
 ## Overview
 
-SDK initialization options allow you to customize Moss behavior directly in your application code. These settings **override Dashboard defaults** when specified, giving developers fine-grained control per deployment, environment, or user segment.
+SDK configuration options allow you to customize Moss behavior directly in your application code. These settings **override Dashboard defaults** when specified, giving developers fine-grained control per deployment, environment, or user segment.
 
 <Info>
-    **Priority reminder:** SDK initialization options take precedence over
+    **Priority reminder:** SDK configuration options take precedence over
     Dashboard settings. When you configure an option in code, it will override
     the value set in the Dashboard. This allows developers to customize behavior
     per-deployment while using Dashboard settings as defaults.
@@ -18,19 +18,27 @@ SDK initialization options allow you to customize Moss behavior directly in your
 
 ## Required Options
 
-These options must be provided when initializing the SDK:
+These options must be provided in the `AgentProvider` config:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',  // Required: Your application ID
-    userId: 'USER_ID'              // Required: Unique user identifier
-})
+```tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 | Option | Type | Description |
 |--------|------|-------------|
+| `apiUrl` | `string` | Moss API endpoint URL |
 | `applicationId` | `string` | Your unique application ID from the Dashboard |
 | `userId` | `string` | Unique identifier for the current user |
+| `getJwt` | `() => Promise<string>` | Function that returns a JWT token |
 
 <Warning>
     The `userId` should be a stable identifier for your user. Avoid using PII
@@ -47,12 +55,16 @@ These options are frequently used to customize SDK behavior:
 
 Set the UI language for the SDK interface.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    language: 'en'  // 'en', 'ko', or undefined for auto-detect
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  language: 'en',  // 'en', 'ko', or undefined for auto-detect
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `undefined` (auto-detects browser language)
@@ -65,12 +77,16 @@ window.Moss.init({
 
 Enable or disable screenshot analysis capabilities.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    useVision: true  // Enable visual context
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  useVision: true,  // Enable visual context
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `true` (from Dashboard)
@@ -79,12 +95,16 @@ window.Moss.init({
 
 Control whether user sessions are recorded for replay.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    enableSessionRecording: false  // Disable for privacy-sensitive users
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  enableSessionRecording: false,  // Disable for privacy-sensitive users
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `true` (from Dashboard)
@@ -93,12 +113,16 @@ window.Moss.init({
 
 Include user action history in AI context.
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    enableScreenHistoryRecording: true
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  enableScreenHistoryRecording: true,
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `true` (from Dashboard)
@@ -109,17 +133,21 @@ window.Moss.init({
 
 Configure multi-step planning features:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    planning: {
-        enabled: true,           // Enable planning feature
-        maxSteps: 15,           // Maximum steps per plan (1-20)
-        allowUserSkip: true,    // Allow skipping steps
-        showPlanOverview: true  // Show plan before execution
-    }
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  planning: {
+    enabled: true,
+    maxSteps: 15,
+    allowUserSkip: true,
+    showPlanOverview: true,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 | Option | Type | Default | Description |
@@ -135,16 +163,20 @@ window.Moss.init({
 
 Configure session management behavior:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    sessionConfig: {
-        inactivityTimeout: 60,   // Minutes before timeout
-        maxSessionAge: 4,        // Hours before forced expiry
-        showNotification: true   // Show session notifications
-    }
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  sessionConfig: {
+    inactivityTimeout: 60,
+    maxSessionAge: 4,
+    showNotification: true,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 | Option | Type | Default | Description |
@@ -161,12 +193,16 @@ Advanced settings for debugging and customization:
 
 ### Screenshot Mode
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    screenshotMode: 'viewport'  // 'fullpage' or 'viewport'
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  screenshotMode: 'viewport',  // 'fullpage' or 'viewport'
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `'fullpage'`
@@ -182,12 +218,16 @@ window.Moss.init({
 
 ### Log Level
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    logLevel: 'DEBUG'  // 'ERROR', 'WARN', 'INFO', 'DEBUG'
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  logLevel: 'DEBUG',  // 'ERROR', 'WARN', 'INFO', 'DEBUG'
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `'INFO'`
@@ -196,12 +236,16 @@ Higher levels include all lower levels (DEBUG shows everything).
 
 ### Debug Mode
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    debugMode: true
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  debugMode: true,
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `false`
@@ -210,12 +254,16 @@ Enables verbose logging and debug features for troubleshooting.
 
 ### DOM Target Selector
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    observeTargetSelector: '#main-content'
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  observeTargetSelector: '#main-content',
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 **Default:** `'body'`
@@ -226,25 +274,29 @@ CSS selector for the DOM element to observe. Change this to limit observation to
 
 Configure how the SDK waits for the page to stabilize:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    stability: {
-        maxTotalWaitMs: 15000,
-        layers: {
-            networkIdle: true,
-            domMutations: true,
-            loadingIndicators: false,
-            layoutShift: false,
-            browserIdle: true,
-            finalFrame: true
-        },
-        domMutations: {
-            quietPeriodMs: 1000  // Wait 1s of DOM quiet
-        }
-    }
-})
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  stability: {
+    maxTotalWaitMs: 15000,
+    layers: {
+      networkIdle: true,
+      domMutations: true,
+      loadingIndicators: false,
+      layoutShift: false,
+      browserIdle: true,
+      finalFrame: true,
+    },
+    domMutations: {
+      quietPeriodMs: 1000,
+    },
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 <Tip>
@@ -260,54 +312,56 @@ Here's the full TypeScript interface for SDK configuration:
 
 ```typescript
 interface MossConfig {
-    // Required
-    applicationId: string;
-    userId: string;
+  // Required
+  apiUrl: string;
+  applicationId: string;
+  userId: string;
+  getJwt: () => Promise<string>;
 
-    // Application Features
-    useVision?: boolean;
-    language?: 'en' | 'ko';
+  // Application Features
+  useVision?: boolean;
+  language?: 'en' | 'ko';
 
-    // Recording & History
-    enableSessionRecording?: boolean;
-    enableScreenHistoryRecording?: boolean;
+  // Recording & History
+  enableSessionRecording?: boolean;
+  enableScreenHistoryRecording?: boolean;
 
-    // Planning Configuration
-    planning?: {
-        enabled?: boolean;
-        maxSteps?: number;
-        allowUserSkip?: boolean;
-        showPlanOverview?: boolean;
+  // Planning Configuration
+  planning?: {
+    enabled?: boolean;
+    maxSteps?: number;
+    allowUserSkip?: boolean;
+    showPlanOverview?: boolean;
+  };
+
+  // Session Management
+  sessionConfig?: {
+    inactivityTimeout?: number;
+    maxSessionAge?: number;
+    showNotification?: boolean;
+  };
+
+  // Technical Settings
+  logLevel?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+  debugMode?: boolean;
+  screenshotMode?: 'fullpage' | 'viewport';
+  observeTargetSelector?: string;
+
+  // DOM Stability
+  stability?: {
+    maxTotalWaitMs?: number;
+    layers?: {
+      networkIdle?: boolean;
+      domMutations?: boolean;
+      loadingIndicators?: boolean;
+      layoutShift?: boolean;
+      browserIdle?: boolean;
+      finalFrame?: boolean;
     };
-
-    // Session Management
-    sessionConfig?: {
-        inactivityTimeout?: number;
-        maxSessionAge?: number;
-        showNotification?: boolean;
+    domMutations?: {
+      quietPeriodMs?: number;
     };
-
-    // Technical Settings
-    logLevel?: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
-    debugMode?: boolean;
-    screenshotMode?: 'fullpage' | 'viewport';
-    observeTargetSelector?: string;
-
-    // DOM Stability
-    stability?: {
-        maxTotalWaitMs?: number;
-        layers?: {
-            networkIdle?: boolean;
-            domMutations?: boolean;
-            loadingIndicators?: boolean;
-            layoutShift?: boolean;
-            browserIdle?: boolean;
-            finalFrame?: boolean;
-        };
-        domMutations?: {
-            quietPeriodMs?: number;
-        };
-    };
+  };
 }
 ```
 
@@ -334,17 +388,17 @@ The following settings can only be configured through the Dashboard:
 
 <CardGroup cols={2}>
     <Card
-        title="Runtime API"
-        icon="bolt"
-        href="/en/configurations/runtime-api"
-    >
-        Make dynamic configuration changes after initialization
-    </Card>
-    <Card
         title="Examples"
         icon="lightbulb"
         href="/en/configurations/examples"
     >
         See complete configuration examples for different use cases
+    </Card>
+    <Card
+        title="Dashboard Settings"
+        icon="browser"
+        href="/en/configurations/dashboard-settings"
+    >
+        Configure application defaults in the Dashboard
     </Card>
 </CardGroup>

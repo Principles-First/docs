@@ -5,7 +5,7 @@ description: "Complete configuration examples for common use cases"
 
 ## Overview
 
-This page provides complete, copy-paste ready configuration examples for different use cases. Each example includes both SDK initialization and relevant runtime configurations.
+This page provides complete, copy-paste ready configuration examples for different use cases using the `AgentProvider` component.
 
 ---
 
@@ -13,11 +13,17 @@ This page provides complete, copy-paste ready configuration examples for differe
 
 The simplest configuration to get started:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID'
-})
+```tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 This uses all Dashboard defaults. Perfect for quick testing or when Dashboard settings meet your needs.
@@ -28,32 +34,36 @@ This uses all Dashboard defaults. Perfect for quick testing or when Dashboard se
 
 Full-featured configuration for users who need comprehensive assistance:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'premium-user-123',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'premium-user-123',
+  getJwt: () => fetchMossToken(),
 
-    // Enable all features
-    useVision: true,
-    enableSessionRecording: true,
-    enableScreenHistoryRecording: true,
-    language: 'en',
+  // Enable all features
+  useVision: true,
+  enableSessionRecording: true,
+  enableScreenHistoryRecording: true,
+  language: 'en',
 
-    // Advanced planning
-    planning: {
-        enabled: true,
-        maxSteps: 15,
-        allowUserSkip: true,
-        showPlanOverview: true
-    },
+  // Advanced planning
+  planning: {
+    enabled: true,
+    maxSteps: 15,
+    allowUserSkip: true,
+    showPlanOverview: true,
+  },
 
-    // Extended sessions for premium users
-    sessionConfig: {
-        inactivityTimeout: 60,
-        maxSessionAge: 4,
-        showNotification: true
-    }
-})
+  // Extended sessions for premium users
+  sessionConfig: {
+    inactivityTimeout: 60,
+    maxSessionAge: 4,
+    showNotification: true,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 ---
@@ -62,26 +72,30 @@ window.Moss.init({
 
 Configuration optimized for development and debugging:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'dev-user',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'dev-user',
+  getJwt: () => fetchMossToken(),
 
-    // Debug settings
-    debugMode: true,
-    logLevel: 'DEBUG',
+  // Debug settings
+  debugMode: true,
+  logLevel: 'DEBUG',
 
-    // Minimal stability checks for fast testing
-    stability: {
-        layers: {
-            networkIdle: false,
-            browserIdle: false
-        }
+  // Minimal stability checks for fast testing
+  stability: {
+    layers: {
+      networkIdle: false,
+      browserIdle: false,
     },
+  },
 
-    // Viewport screenshots for faster testing
-    screenshotMode: 'viewport'
-})
+  // Viewport screenshots for faster testing
+  screenshotMode: 'viewport',
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 <Tip>
@@ -94,42 +108,26 @@ window.Moss.init({
 
 Minimal data collection for privacy-conscious users:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'privacy-user-456',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: 'privacy-user-456',
+  getJwt: () => fetchMossToken(),
 
-    // Minimal data collection
-    enableSessionRecording: false,
-    enableScreenHistoryRecording: false,
-    useVision: true,  // Still helpful but less data stored
+  // Minimal data collection
+  enableSessionRecording: false,
+  enableScreenHistoryRecording: false,
+  useVision: true,  // Still helpful but less data stored
 
-    // Short sessions
-    sessionConfig: {
-        inactivityTimeout: 15,
-        maxSessionAge: 1
-    }
-})
-```
-
-### With Runtime Privacy Toggle
-
-```javascript
-// Initial setup with recording enabled
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    enableSessionRecording: true,
-    enableScreenHistoryRecording: true
-})
-
-// Privacy toggle handler
-function setPrivacyMode(enabled) {
-    window.Moss.configure({
-        enableSessionRecording: !enabled,
-        enableScreenHistoryRecording: !enabled
-    })
-}
+  // Short sessions
+  sessionConfig: {
+    inactivityTimeout: 15,
+    maxSessionAge: 1,
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 ---
@@ -138,137 +136,126 @@ function setPrivacyMode(enabled) {
 
 Different configurations based on subscription level:
 
-```javascript
+```tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
+
 const subscriptionConfigs = {
-    free: {
-        planning: { enabled: false },
-        sessionConfig: {
-            inactivityTimeout: 15,
-            maxSessionAge: 1
-        }
+  free: {
+    planning: { enabled: false },
+    sessionConfig: {
+      inactivityTimeout: 15,
+      maxSessionAge: 1,
     },
-    pro: {
-        planning: {
-            enabled: true,
-            maxSteps: 10,
-            allowUserSkip: true,
-            showPlanOverview: true
-        },
-        sessionConfig: {
-            inactivityTimeout: 30,
-            maxSessionAge: 2
-        }
+  },
+  pro: {
+    planning: {
+      enabled: true,
+      maxSteps: 10,
+      allowUserSkip: true,
+      showPlanOverview: true,
     },
-    enterprise: {
-        planning: {
-            enabled: true,
-            maxSteps: 20,
-            allowUserSkip: true,
-            showPlanOverview: true
-        },
-        sessionConfig: {
-            inactivityTimeout: 60,
-            maxSessionAge: 8
-        }
-    }
-}
+    sessionConfig: {
+      inactivityTimeout: 30,
+      maxSessionAge: 2,
+    },
+  },
+  enterprise: {
+    planning: {
+      enabled: true,
+      maxSteps: 20,
+      allowUserSkip: true,
+      showPlanOverview: true,
+    },
+    sessionConfig: {
+      inactivityTimeout: 60,
+      maxSessionAge: 8,
+    },
+  },
+};
 
-function initMossForUser(user) {
-    const tierConfig = subscriptionConfigs[user.tier] || subscriptionConfigs.free
+function MossAssistant({ user }) {
+  const tierConfig = subscriptionConfigs[user.tier] || subscriptionConfigs.free;
 
-    window.Moss.init({
-        applicationId: 'YOUR_APP_ID',
-        userId: user.id,
-        ...tierConfig
-    })
+  return (
+    <AgentProvider config={{
+      apiUrl: 'https://clippy-api.viamoss.ai',
+      applicationId: 'YOUR_APP_ID',
+      userId: user.id,
+      getJwt: () => fetchMossToken(),
+      ...tierConfig,
+    }}>
+      <AssistantButton />
+    </AgentProvider>
+  );
 }
 ```
 
 ---
 
-## Single Page Application (SPA)
+## Next.js App Router
 
-Configuration for React, Vue, or Angular applications:
+Complete setup for Next.js with App Router:
 
-<Tabs>
-  <Tab title="React">
-    ```tsx
-    import { useEffect } from 'react'
-    import { useAuth } from './auth'  // Your auth hook
+```tsx app/layout.tsx
+import { MossAssistant } from '@/components/moss-assistant';
+import { auth } from '@/lib/auth';
 
-    function App() {
-        const { user, isAuthenticated } = useAuth()
+export default async function RootLayout({ children }) {
+  const session = await auth();
 
-        useEffect(() => {
-            if (isAuthenticated && user) {
-                window.Moss.init({
-                    applicationId: process.env.REACT_APP_MOSS_APP_ID,
-                    userId: user.id,
-                    language: user.preferredLanguage,
-                    planning: {
-                        enabled: user.subscription === 'pro'
-                    }
-                })
-            }
-        }, [isAuthenticated, user])
+  return (
+    <html>
+      <body>
+        {children}
+        {session?.user && <MossAssistant userId={session.user.id} />}
+      </body>
+    </html>
+  );
+}
+```
 
-        return <div>Your App</div>
-    }
-    ```
-  </Tab>
-  <Tab title="Vue">
-    ```vue
-    <script setup>
-    import { watch } from 'vue'
-    import { useAuth } from './composables/auth'
+```tsx components/moss-assistant.tsx
+'use client';
 
-    const { user, isAuthenticated } = useAuth()
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
 
-    watch([isAuthenticated, user], ([auth, u]) => {
-        if (auth && u) {
-            window.Moss.init({
-                applicationId: import.meta.env.VITE_MOSS_APP_ID,
-                userId: u.id,
-                language: u.preferredLanguage,
-                planning: {
-                    enabled: u.subscription === 'pro'
-                }
-            })
-        }
-    }, { immediate: true })
-    </script>
-    ```
-  </Tab>
-  <Tab title="Angular">
-    ```typescript
-    import { Component, OnInit } from '@angular/core'
-    import { AuthService } from './auth.service'
+export function MossAssistant({ userId }: { userId: string }) {
+  return (
+    <AgentProvider config={{
+      apiUrl: 'https://clippy-api.viamoss.ai',
+      applicationId: process.env.NEXT_PUBLIC_MOSS_APP_ID!,
+      userId,
+      getJwt: async () => {
+        const res = await fetch('/api/moss-token');
+        const data = await res.json();
+        return data.token;
+      },
+    }}>
+      <AssistantButton />
+    </AgentProvider>
+  );
+}
+```
 
-    @Component({
-        selector: 'app-root',
-        template: '<router-outlet></router-outlet>'
-    })
-    export class AppComponent implements OnInit {
-        constructor(private auth: AuthService) {}
+```typescript app/api/moss-token/route.ts
+import jwt from 'jsonwebtoken';
+import { auth } from '@/lib/auth';
 
-        ngOnInit() {
-            this.auth.user$.subscribe(user => {
-                if (user) {
-                    (window as any).Moss.init({
-                        applicationId: environment.mossAppId,
-                        userId: user.id,
-                        language: user.preferredLanguage,
-                        planning: {
-                            enabled: user.subscription === 'pro'
-                        }
-                    })
-                }
-            })
-        }
-    }
-    ```
-  </Tab>
-</Tabs>
+export async function GET() {
+  const session = await auth();
+  if (!session?.user) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const token = jwt.sign(
+    { sub: session.user.id, app: process.env.MOSS_APP_ID },
+    process.env.MOSS_JWT_SECRET!,
+    { expiresIn: '1h' }
+  );
+
+  return Response.json({ token });
+}
+```
 
 ---
 
@@ -276,31 +263,35 @@ Configuration for React, Vue, or Angular applications:
 
 Optimized for minimal overhead:
 
-```javascript
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
 
-    // Reduce screenshot processing
-    screenshotMode: 'viewport',
+  // Reduce screenshot processing
+  screenshotMode: 'viewport',
 
-    // Minimal logging
-    logLevel: 'ERROR',
-    debugMode: false,
+  // Minimal logging
+  logLevel: 'ERROR',
+  debugMode: false,
 
-    // Fast stability checks
-    stability: {
-        maxTotalWaitMs: 5000,
-        layers: {
-            networkIdle: true,
-            domMutations: true,
-            loadingIndicators: false,  // Skip loading indicator detection
-            layoutShift: false,        // Skip layout shift detection
-            browserIdle: false,        // Skip requestIdleCallback
-            finalFrame: true
-        }
-    }
-})
+  // Fast stability checks
+  stability: {
+    maxTotalWaitMs: 5000,
+    layers: {
+      networkIdle: true,
+      domMutations: true,
+      loadingIndicators: false,
+      layoutShift: false,
+      browserIdle: false,
+      finalFrame: true,
+    },
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 ---
@@ -315,17 +306,11 @@ window.Moss.init({
 - Managing AI instructions that apply to all users
 - Settings that rarely change
 
-**Use SDK Initialization When:**
+**Use SDK Configuration When:**
 - Per-user customization is needed
 - Configuration depends on environment (dev/staging/prod)
 - Different user tiers need different settings
 - Integrating with existing user preferences
-
-**Use Runtime Configuration When:**
-- Responding to user actions (privacy toggle)
-- Implementing feature flags or A/B tests
-- Session-specific overrides
-- Dynamic adjustments based on conditions
 
 ### Performance Tips
 

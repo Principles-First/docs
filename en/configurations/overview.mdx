@@ -12,16 +12,14 @@ Moss SDK can be configured in multiple ways to fit your application's needs. Thi
 | Method | Use Case | Priority |
 |--------|----------|----------|
 | **Dashboard Settings** | Application-wide defaults, security policies | Lowest |
-| **SDK Initialization** | Per-deployment customization, environment-specific settings | Medium |
-| **Runtime API** | Dynamic changes based on user actions or conditions | Highest |
+| **SDK Configuration** | Per-deployment customization, environment-specific settings | Highest |
 
 ## Configuration Priority
 
 When the same setting is configured in multiple places, Moss uses this priority order (highest to lowest):
 
-1. **Runtime API calls** - `window.Moss.configure()`
-2. **SDK initialization parameters** - Script tag or constructor options
-3. **Dashboard settings** - Application-level defaults
+1. **SDK configuration** - `AgentProvider` config options
+2. **Dashboard settings** - Application-level defaults
 
 <Info>
     This priority system allows you to set sensible defaults in the Dashboard
@@ -30,17 +28,18 @@ When the same setting is configured in multiple places, Moss uses this priority 
 
 ### Example: Priority in Action
 
-```javascript
+```tsx
 // Dashboard setting: language = 'en'
-// SDK initialization overrides it:
-window.Moss.init({
-    applicationId: 'YOUR_APP_ID',
-    userId: 'USER_ID',
-    language: 'ko'  // This takes precedence over Dashboard
-})
-
-// Runtime API overrides both:
-window.Moss.configure({ language: 'en' })  // This wins
+// SDK configuration overrides it:
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  language: 'ko',  // This takes precedence over Dashboard
+}}>
+  <AssistantButton />
+</AgentProvider>
 ```
 
 ## Quick Reference
@@ -59,22 +58,22 @@ These settings can only be configured through the Dashboard:
 
 These settings can be set in Dashboard and overridden via SDK:
 
-| Setting | Dashboard | SDK Init | Runtime |
-|---------|-----------|----------|---------|
-| Language | Yes | Yes | Yes |
-| Enable Vision | Yes | Yes | No |
-| Session Recording | Yes | Yes | Yes |
-| Screen History | Yes | Yes | Yes |
-| Planning | Yes | Yes | Yes |
-| Session Timeouts | Yes | Yes | No |
-| Screenshot Mode | Yes | Yes | No |
-| Log Level | Yes | Yes | No |
-| Debug Mode | Yes | Yes | No |
-| DOM Stability | Yes | Yes | No |
+| Setting | Dashboard | SDK Config |
+|---------|-----------|------------|
+| Language | Yes | Yes |
+| Enable Vision | Yes | Yes |
+| Session Recording | Yes | Yes |
+| Screen History | Yes | Yes |
+| Planning | Yes | Yes |
+| Session Timeouts | Yes | Yes |
+| Screenshot Mode | Yes | Yes |
+| Log Level | Yes | Yes |
+| Debug Mode | Yes | Yes |
+| DOM Stability | Yes | Yes |
 
 ## Next Steps
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
     <Card
         title="Dashboard Settings"
         icon="browser"
@@ -88,13 +87,6 @@ These settings can be set in Dashboard and overridden via SDK:
         href="/en/configurations/sdk-options"
     >
         Customize behavior in your application code
-    </Card>
-    <Card
-        title="Runtime API"
-        icon="bolt"
-        href="/en/configurations/runtime-api"
-    >
-        Make dynamic configuration changes
     </Card>
     <Card
         title="Examples"

@@ -6,145 +6,67 @@ icon: "rocket"
 
 # Quick Start Guide
 
-Get your AI assistant up and running in just a few steps. Choose your platform below and copy the code snippet to get started.
+Get your AI assistant up and running in just a few steps.
 
 <Info>
     You'll need your **Application ID** from the [Moss
-    Dashboard](https://dashboard.viamoss.ai).
+    Dashboard](https://dashboard.viamoss.ai) and a JWT signing key for authentication.
 </Info>
 
-## Installation
+## 1. Install the SDK
 
-<Tabs>
-  <Tab title="HTML / Vanilla JS">
-    Add this script tag to your HTML file:
+```bash
+npm install @viamoss/moss-sdk
+```
 
-    ```html
-    <script src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID"></script>
-    ```
+## 2. Add Moss to Your App
 
-    <Warning>
-      Replace `YOUR_APP_ID` with your actual Application ID and `USER_ID` with a unique identifier for your user.
-    </Warning>
+Add `AgentProvider` and `AssistantButton` to your application. The provider does **not** need to wrap your entire app — just the Moss components.
 
-  </Tab>
+```tsx App.tsx
+import { AgentProvider, AssistantButton } from '@viamoss/moss-sdk';
 
-  <Tab title="Next.js">
-    Add the SDK to your root layout:
+function App() {
+  return (
+    <>
+      <YourApp />
+      <AgentProvider config={{
+        apiUrl: 'https://clippy-api.viamoss.ai',
+        applicationId: 'YOUR_APP_ID',
+        userId: currentUser.id,
+        getJwt: () => fetchMossToken(),
+      }}>
+        <AssistantButton />
+      </AgentProvider>
+    </>
+  );
+}
+```
 
-    ```tsx app/layout.tsx
-    import Script from 'next/script'
+<Tip>
+    `AgentProvider` only needs to wrap the Moss UI components. It observes the full page DOM regardless of where it sits in the React tree.
+</Tip>
 
-    export default function RootLayout({ children }) {
-      return (
-        <html>
-          <head>
-            <Script
-              src="https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId={userId}"
-            />
-          </head>
-          <body>{children}</body>
-        </html>
-      )
-    }
-    ```
+## 3. Set Up Authentication
 
-    <Tip>
-      Replace `{userId}` with your actual user variable from your authentication system.
-    </Tip>
+Create a backend endpoint to generate JWT tokens for your users. See the [Authentication Guide](/en/sdk/authentication) for complete setup instructions.
 
-  </Tab>
+```typescript api/moss-token.ts
+// Example Next.js API route
+import jwt from 'jsonwebtoken';
 
-  <Tab title="React">
-    Add the SDK dynamically using React hooks:
+export async function GET(request: Request) {
+  const user = await getCurrentUser(request);
 
-    ```tsx App.tsx
-    import { useEffect } from 'react'
+  const token = jwt.sign(
+    { sub: user.id, app: 'YOUR_APP_ID' },
+    process.env.MOSS_JWT_SECRET,
+    { expiresIn: '1h' }
+  );
 
-    function App() {
-      useEffect(() => {
-        const script = document.createElement('script')
-        script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID'
-        script.async = true
-        document.head.appendChild(script)
-
-        return () => {
-          if (document.head.contains(script)) {
-            document.head.removeChild(script)
-          }
-        }
-      }, [])
-
-      return <div>Your App</div>
-    }
-    ```
-
-    <Warning>
-      Don't forget to replace `YOUR_APP_ID` and `USER_ID` with actual values.
-    </Warning>
-
-  </Tab>
-
-  <Tab title="Vue.js">
-    Add the SDK in your main Vue component:
-
-    ```vue App.vue
-    <script setup>
-    import { onMounted, onUnmounted } from 'vue'
-
-    let script = null
-
-    onMounted(() => {
-      script = document.createElement('script')
-      script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID'
-      script.async = true
-      document.head.appendChild(script)
-    })
-
-    onUnmounted(() => {
-      if (script && document.head.contains(script)) {
-        document.head.removeChild(script)
-      }
-    })
-    </script>
-
-    <template>
-      <div>Your App</div>
-    </template>
-    ```
-
-  </Tab>
-
-  <Tab title="Angular">
-    Add the SDK in your main component:
-
-    ```typescript app.component.ts
-    import { Component, OnInit, OnDestroy } from '@angular/core';
-
-    @Component({
-      selector: 'app-root',
-      templateUrl: './app.component.html'
-    })
-    export class AppComponent implements OnInit, OnDestroy {
-      private script: HTMLScriptElement | null = null;
-
-      ngOnInit() {
-        this.script = document.createElement('script');
-        this.script.src = 'https://cdn.viamoss.ai/moss-sdk@latest.min.js?applicationId=YOUR_APP_ID&userId=USER_ID';
-        this.script.async = true;
-        document.head.appendChild(this.script);
-      }
-
-      ngOnDestroy() {
-        if (this.script && document.head.contains(this.script)) {
-          document.head.removeChild(this.script);
-        }
-      }
-    }
-    ```
-
-  </Tab>
-</Tabs>
+  return Response.json({ token });
+}
+```
 
 ## What's Next?
 
@@ -152,11 +74,18 @@ That's it! The Moss AI assistant will now appear as a floating action button in 
 
 <CardGroup cols={2}>
     <Card
+        title="Authentication"
+        icon="lock"
+        href="/en/sdk/authentication"
+    >
+        Complete JWT authentication setup
+    </Card>
+    <Card
         title="Configuration"
         icon="gear"
         href="/en/configurations/overview"
     >
-        Customize the SDK behavior and appearance
+        Customize SDK behavior and options
     </Card>
 </CardGroup>
 
@@ -164,7 +93,7 @@ That's it! The Moss AI assistant will now appear as a floating action button in 
 
 <Tip>
     Check out the [Dashboard](https://dashboard.viamoss.ai) for your Application
-    ID, API keys, and detailed analytics.
+    ID, JWT signing keys, and detailed analytics.
 </Tip>
 
-If you encounter any issues, please contact our support team or check the troubleshooting guide.
+If you encounter any issues, please contact our support team or check the [troubleshooting guide](/en/sdk/advanced#troubleshooting).

@@ -49,7 +49,6 @@
               "en/configurations/overview",
               "en/configurations/dashboard-settings",
               "en/configurations/sdk-options",
-              "en/configurations/runtime-api",
               "en/configurations/examples"
             ]
           },
@@ -91,7 +90,6 @@
               "ko/configurations/overview",
               "ko/configurations/dashboard-settings",
               "ko/configurations/sdk-options",
-              "ko/configurations/runtime-api",
               "ko/configurations/examples"
             ]
           },
