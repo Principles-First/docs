@@ -28,6 +28,7 @@ Users can request access to their data:
 Moss provides comprehensive data deletion:
 
 **What Gets Deleted:**
+
 - Chat sessions and messages
 - AI-generated instructions and plans
 - Screenshots and recordings
@@ -69,11 +70,11 @@ Export user data in standard formats:
 
 Moss supports multiple lawful bases for processing:
 
-| Basis | Implementation |
-|-------|----------------|
-| **Consent** | SDK can prompt for user consent before activation |
-| **Legitimate Interest** | Analytics and product improvement |
-| **Contract** | Providing the AI assistant service |
+| Basis                   | Implementation                                    |
+| ----------------------- | ------------------------------------------------- |
+| **Consent**             | SDK can prompt for user consent before activation |
+| **Legitimate Interest** | Analytics and product improvement                 |
+| **Contract**            | Providing the AI assistant service                |
 
 ### Data Processing Agreement
 
@@ -87,10 +88,10 @@ Moss is pursuing SOC 2 Type II certification.
 
 ### Trust Service Criteria
 
-| Criteria | Status | Description |
-|----------|--------|-------------|
-| **Security** | In Progress | Protection against unauthorized access |
-| **Availability** | In Progress | System availability for operation |
+| Criteria            | Status      | Description                            |
+| ------------------- | ----------- | -------------------------------------- |
+| **Security**        | In Progress | Protection against unauthorized access |
+| **Availability**    | In Progress | System availability for operation      |
 | **Confidentiality** | In Progress | Protection of confidential information |
 
 ### Controls
@@ -168,7 +169,7 @@ Restrict where your SDK can operate:
 
 ### Configuration
 
-Add allowed domains in Dashboard under **Settings > Security**:
+Add allowed domains in Dashboard under **Settings \> Security**:
 
 ```
 app.example.com
@@ -179,45 +180,6 @@ localhost:3000
 ### Enforcement
 
 Requests from unlisted domains are rejected during SDK initialization.
-
----
-
-## Security Certifications
-
-### Current
-
-| Certification | Status |
-|---------------|--------|
-| HTTPS/TLS 1.2+ | Active |
-| Secure credential storage | Active |
-| Audit logging | Active |
-
-### In Progress
-
-| Certification | Expected |
-|---------------|----------|
-| SOC 2 Type II | 2025 |
-| ISO 27001 | 2025 |
-
-### Planned
-
-| Certification | Timeline |
-|---------------|----------|
-| HIPAA | Under evaluation |
-| PCI DSS | Under evaluation |
-
----
-
-## Compliance Features Summary
-
-| Feature | GDPR | SOC 2 | ISO 27001 | EU AI Act |
-|---------|------|-------|-----------|-----------|
-| Data deletion | Yes | Yes | Yes | - |
-| Audit logging | Yes | Yes | Yes | Yes |
-| Access control | Yes | Yes | Yes | Yes |
-| Encryption | Yes | Yes | Yes | - |
-| User consent | Yes | - | - | Yes |
-| Transparency | Yes | - | - | Yes |
 
 ---
 
@@ -234,29 +196,15 @@ Requests from unlisted domains are rejected during SDK initialization.
 - **Data Processing Agreement (DPA)** - Available for enterprise customers
 - **Business Associate Agreement (BAA)** - Available for healthcare customers
 
-### Contact
-
-For compliance inquiries:
-- Email: compliance@viamoss.ai
-- Dashboard: Support > Compliance
-
 ---
 
 ## Next Steps
 
 <CardGroup cols={2}>
-    <Card
-        title="Security Overview"
-        icon="shield-check"
-        href="/en/security/overview"
-    >
-        Complete security architecture
-    </Card>
-    <Card
-        title="Audit Logging"
-        icon="clipboard-list"
-        href="/en/security/audit-logging"
-    >
-        Detailed audit trail documentation
-    </Card>
+  <Card title="Security Overview" icon="shield-check" href="/en/security/overview">
+    Complete security architecture
+  </Card>
+  <Card title="Audit Logging" icon="clipboard-list" href="/en/security/audit-logging">
+    Detailed audit trail documentation
+  </Card>
 </CardGroup>

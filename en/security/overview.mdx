@@ -17,13 +17,13 @@ This documentation outlines the security measures implemented in Moss to protect
 
 Moss employs multiple layers of security controls:
 
-| Layer | Protection |
-|-------|------------|
-| **Authentication** | JWT tokens, API keys, and SSO via Clerk |
-| **Authorization** | Organization-based access control, session verification |
-| **Data Protection** | Encryption in transit (TLS), sensitive data redaction |
-| **Audit Logging** | Comprehensive request/response logging with sanitization |
-| **Input Validation** | Schema validation on all API endpoints |
+| Layer                | Protection                                               |
+| -------------------- | -------------------------------------------------------- |
+| **Authentication**   | JWT tokens, API keys, and SSO via Clerk                  |
+| **Authorization**    | Organization-based access control, session verification  |
+| **Data Protection**  | Encryption in transit (TLS), sensitive data redaction    |
+| **Audit Logging**    | Comprehensive request/response logging with sanitization |
+| **Input Validation** | Schema validation on all API endpoints                   |
 
 ### Multi-Tenancy Isolation
 
@@ -41,11 +41,11 @@ Moss is actively pursuing industry-standard security certifications:
 
 ### In Progress
 
-| Certification | Description | Status |
-|--------------|-------------|--------|
+| Certification     | Description                                          | Status      |
+| ----------------- | ---------------------------------------------------- | ----------- |
 | **SOC 2 Type II** | Security, availability, and confidentiality controls | In Progress |
-| **ISO 27001** | Information security management system | Planned |
-| **EU AI Act** | AI system transparency and accountability | In Progress |
+| **ISO 27001**     | Information security management system               | In Progress |
+| **EU AI Act**     | AI system transparency and accountability            | In Progress |
 
 ### Current Compliance
 
@@ -58,40 +58,24 @@ Moss is actively pursuing industry-standard security certifications:
 ## Security Features Overview
 
 <CardGroup cols={2}>
-    <Card
-        title="Authentication"
-        icon="key"
-        href="/en/security/authentication"
-    >
-        JWT tokens, API keys, and multi-factor authentication
-    </Card>
-    <Card
-        title="Data Protection"
-        icon="lock"
-        href="/en/security/data-protection"
-    >
-        Encryption, input validation, and secure storage
-    </Card>
-    <Card
-        title="Audit Logging"
-        icon="clipboard-list"
-        href="/en/security/audit-logging"
-    >
-        Comprehensive audit trails and compliance reporting
-    </Card>
-    <Card
-        title="Compliance"
-        icon="certificate"
-        href="/en/security/compliance"
-    >
-        GDPR, SOC 2, ISO 27001, and EU AI Act
-    </Card>
+  <Card title="Authentication" icon="key" href="/en/security/authentication">
+    JWT tokens, API keys, and multi-factor authentication
+  </Card>
+  <Card title="Data Protection" icon="lock" href="/en/security/data-protection">
+    Encryption, input validation, and secure storage
+  </Card>
+  <Card title="Audit Logging" icon="clipboard-list" href="/en/security/audit-logging">
+    Comprehensive audit trails and compliance reporting
+  </Card>
+  <Card title="Compliance" icon="certificate" href="/en/security/compliance">
+    GDPR, SOC 2, ISO 27001, and EU AI Act
+  </Card>
 </CardGroup>
 
 ---
 
 ## Responsible Disclosure
 
-If you discover a security vulnerability in Moss, please report it responsibly. Contact our security team through the Dashboard or email security@viamoss.ai.
+If you discover a security vulnerability in Moss, please report it responsibly. Contact our security team through the Dashboard or email [security@viamoss.ai](mailto:security@viamoss.ai).
 
 We appreciate your help in keeping Moss secure for everyone.
