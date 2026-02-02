@@ -116,6 +116,76 @@ window.MossSDK.shutdown();
 
 ---
 
+## Custom Triggers
+
+Open the assistant from any element using the `data-moss-trigger` attribute — no hooks required.
+
+```html
+<button data-moss-trigger>Need Help?</button>
+```
+
+This works with any element: buttons, links, nav items, or custom components. The SDK listens for clicks on elements with this attribute and toggles the chat modal.
+
+### Examples
+
+```html
+<!-- Navigation help button -->
+<nav>
+  <a href="/dashboard">Dashboard</a>
+  <button data-moss-trigger>Help</button>
+</nav>
+
+<!-- Contextual help link -->
+<div class="form-field">
+  <label>API Key</label>
+  <input type="text" name="apiKey" />
+  <span data-moss-trigger class="help-link">How do I find my API key?</span>
+</div>
+```
+
+### React Component
+
+```tsx
+function HelpButton() {
+  return (
+    <button data-moss-trigger className="custom-help-btn">
+      Get Assistance
+    </button>
+  );
+}
+```
+
+<Tip>
+    The attribute works inside React components without needing `useAgent()`. Useful for simple triggers without state management.
+</Tip>
+
+### Without AssistantButton
+
+You can use custom triggers instead of the built-in button:
+
+```tsx
+<AgentProvider config={config}>
+  {/* Custom trigger only - no AssistantButton */}
+  <nav>
+    <button data-moss-trigger>Help</button>
+  </nav>
+  <YourApp />
+</AgentProvider>
+```
+
+### TypeScript Constant
+
+The SDK exports the attribute name for programmatic use:
+
+```tsx
+import { MOSS_TRIGGER_ATTR } from '@viamoss/moss-sdk';
+
+// MOSS_TRIGGER_ATTR = 'data-moss-trigger'
+<button {...{ [MOSS_TRIGGER_ATTR]: true }}>Help</button>
+```
+
+---
+
 ## Framework Examples
 
 <Tabs>

@@ -116,6 +116,76 @@ window.MossSDK.shutdown();
 
 ---
 
+## 커스텀 트리거
+
+`data-moss-trigger` 속성을 사용하면 훅 없이 어떤 요소에서든 어시스턴트를 열 수 있습니다.
+
+```html
+<button data-moss-trigger>도움이 필요하세요?</button>
+```
+
+버튼, 링크, 네비게이션 항목, 커스텀 컴포넌트 등 모든 요소에서 작동합니다. SDK는 이 속성이 있는 요소의 클릭을 감지하여 채팅 모달을 토글합니다.
+
+### 예시
+
+```html
+<!-- 네비게이션 도움말 버튼 -->
+<nav>
+  <a href="/dashboard">대시보드</a>
+  <button data-moss-trigger>도움말</button>
+</nav>
+
+<!-- 상황별 도움말 링크 -->
+<div class="form-field">
+  <label>API 키</label>
+  <input type="text" name="apiKey" />
+  <span data-moss-trigger class="help-link">API 키는 어디서 찾나요?</span>
+</div>
+```
+
+### React 컴포넌트
+
+```tsx
+function HelpButton() {
+  return (
+    <button data-moss-trigger className="custom-help-btn">
+      도움 받기
+    </button>
+  );
+}
+```
+
+<Tip>
+    이 속성은 `useAgent()` 없이도 React 컴포넌트 내에서 작동합니다. 상태 관리 없이 간단한 트리거가 필요할 때 유용합니다.
+</Tip>
+
+### AssistantButton 없이 사용하기
+
+기본 제공 버튼 대신 커스텀 트리거만 사용할 수 있습니다:
+
+```tsx
+<AgentProvider config={config}>
+  {/* 커스텀 트리거만 사용 - AssistantButton 없음 */}
+  <nav>
+    <button data-moss-trigger>도움말</button>
+  </nav>
+  <YourApp />
+</AgentProvider>
+```
+
+### TypeScript 상수
+
+SDK는 프로그래밍 방식 사용을 위해 속성 이름을 내보냅니다:
+
+```tsx
+import { MOSS_TRIGGER_ATTR } from '@viamoss/moss-sdk';
+
+// MOSS_TRIGGER_ATTR = 'data-moss-trigger'
+<button {...{ [MOSS_TRIGGER_ATTR]: true }}>도움말</button>
+```
+
+---
+
 ## 프레임워크별 예시
 
 <Tabs>
