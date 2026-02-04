@@ -70,6 +70,7 @@ icon: "gear"
 |------|------|--------|------|
 | `language` | `'en' \| 'ko'` | 자동 감지 | UI 언어 |
 | `screenshotMode` | `'fullpage' \| 'viewport'` | `'fullpage'` | 스크린샷 캡처 방식 |
+| `appearance` | `AppearanceInput` | `'blue'` | 비주얼 테마 (프리셋 이름 또는 커스텀 객체) |
 
 ### 동작
 
@@ -136,6 +137,7 @@ interface MossSDKConfig {
   // 표시
   language?: 'en' | 'ko';
   screenshotMode?: 'fullpage' | 'viewport';
+  appearance?: AppearanceInput;  // 'blue' | 'purple' | 커스텀 객체
 
   // 동작
   useVision?: boolean;

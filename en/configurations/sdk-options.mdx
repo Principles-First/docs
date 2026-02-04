@@ -129,6 +129,79 @@ Include user action history in AI context.
 
 ---
 
+## Appearance
+
+Customize the visual theme of the Moss assistant UI.
+
+### Using Presets
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  appearance: 'blue',  // Use a preset theme
+}}>
+  <AssistantButton />
+</AgentProvider>
+```
+
+**Available presets:**
+
+| Preset | Description |
+|--------|-------------|
+| `'blue'` | Default blue theme with glassmorphism effects |
+| `'purple'` | Purple theme with solid backgrounds |
+
+### Custom Appearance
+
+Override specific properties by passing a partial object:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  appearance: {
+    colors: {
+      primary: '#3b82f6',
+      primaryLight: '#60a5fa',
+    },
+    modal: {
+      defaultPosition: { right: 20, bottom: 20 },
+      defaultSize: { width: 400, height: 600 },
+    },
+    effects: {
+      glassmorphism: true,
+    },
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
+```
+
+### Customizable Properties
+
+| Category | Properties |
+|----------|------------|
+| `colors` | `primary`, `primaryLight`, `primaryLighter`, `userMessage`, `assistantMessage`, `headerBackground`, `inputAreaBackground`, `modalBackground`, `text.*`, `border`, `success`, `error` |
+| `typography` | `fontFamily`, `fontSize.*`, `lineHeight.*` |
+| `spacing` | `3xs`, `2xs`, `xs`, `sm`, `md`, etc. |
+| `radius` | `sm`, `md`, `lg`, `xl` |
+| `shadows` | `sm`, `md`, `lg` |
+| `effects` | `glassmorphism`, `glassBlur`, `glassOpacity` |
+| `inputBar` | `roundedTop`, `topShadow` |
+| `progressBar` | `height` |
+| `modal` | `defaultPosition`, `defaultSize` |
+
+<Tip>
+    Partial objects are deep-merged with the base theme. You only need to specify the properties you want to override.
+</Tip>
+
+---
+
 ## Planning Options
 
 Configure multi-step planning features:
@@ -321,6 +394,7 @@ interface MossConfig {
   // Application Features
   useVision?: boolean;
   language?: 'en' | 'ko';
+  appearance?: AppearanceInput;  // 'blue' | 'purple' | custom object
 
   // Recording & History
   enableSessionRecording?: boolean;

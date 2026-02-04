@@ -259,6 +259,62 @@ export async function GET() {
 
 ---
 
+## Custom Branding Setup
+
+Customize the assistant's visual appearance to match your brand:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+
+  // Custom appearance
+  appearance: {
+    colors: {
+      primary: '#3b82f6',
+      primaryLight: '#60a5fa',
+      primaryLighter: '#dbeafe',
+    },
+    modal: {
+      defaultPosition: { right: 24, bottom: 24 },
+      defaultSize: { width: 420, height: 650 },
+    },
+    effects: {
+      glassmorphism: true,
+      glassOpacity: 0.15,
+    },
+    radius: {
+      lg: '16px',
+      xl: '20px',
+    },
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
+```
+
+Or use a preset theme:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  appearance: 'blue',  // Use the blue preset
+}}>
+  <AssistantButton />
+</AgentProvider>
+```
+
+<Tip>
+    Partial appearance objects are deep-merged with the base theme, so you only need to specify the properties you want to customize.
+</Tip>
+
+---
+
 ## High-Performance Setup
 
 Optimized for minimal overhead:

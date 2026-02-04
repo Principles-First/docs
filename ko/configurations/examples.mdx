@@ -260,6 +260,62 @@ export async function GET() {
 
 ---
 
+## 커스텀 브랜딩 설정
+
+어시스턴트의 비주얼 외관을 브랜드에 맞게 사용자 정의합니다:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+
+  // 커스텀 외관
+  appearance: {
+    colors: {
+      primary: '#3b82f6',
+      primaryLight: '#60a5fa',
+      primaryLighter: '#dbeafe',
+    },
+    modal: {
+      defaultPosition: { right: 24, bottom: 24 },
+      defaultSize: { width: 420, height: 650 },
+    },
+    effects: {
+      glassmorphism: true,
+      glassOpacity: 0.15,
+    },
+    radius: {
+      lg: '16px',
+      xl: '20px',
+    },
+  },
+}}>
+  <AssistantButton />
+</AgentProvider>
+```
+
+또는 프리셋 테마를 사용합니다:
+
+```tsx
+<AgentProvider config={{
+  apiUrl: 'https://clippy-api.viamoss.ai',
+  applicationId: 'YOUR_APP_ID',
+  userId: currentUser.id,
+  getJwt: () => fetchMossToken(),
+  appearance: 'blue',  // 블루 프리셋 사용
+}}>
+  <AssistantButton />
+</AgentProvider>
+```
+
+<Tip>
+    부분 외관 객체는 기본 테마와 깊은 병합(deep-merge)되므로 사용자 정의하려는 속성만 지정하면 됩니다.
+</Tip>
+
+---
+
 ## 고성능 설정
 
 최소 오버헤드에 최적화:

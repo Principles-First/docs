@@ -70,6 +70,7 @@ Options you'll likely want to configure.
 |--------|------|---------|-------------|
 | `language` | `'en' \| 'ko'` | Auto-detect | UI language |
 | `screenshotMode` | `'fullpage' \| 'viewport'` | `'fullpage'` | How screenshots are captured |
+| `appearance` | `AppearanceInput` | `'blue'` | Visual theme (preset name or custom object) |
 
 ### Behavior
 
@@ -136,6 +137,7 @@ interface MossSDKConfig {
   // Display
   language?: 'en' | 'ko';
   screenshotMode?: 'fullpage' | 'viewport';
+  appearance?: AppearanceInput;  // 'blue' | 'purple' | custom object
 
   // Behavior
   useVision?: boolean;
