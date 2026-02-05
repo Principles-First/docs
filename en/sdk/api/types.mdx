@@ -1,0 +1,376 @@
+---
+title: "Types"
+description: "TypeScript interfaces and types exported by the Moss SDK"
+icon: "brackets-curly"
+---
+
+# TypeScript Types
+
+The Moss SDK is written in TypeScript and exports all public types for use in your application.
+
+```tsx
+import type {
+  MossSDKConfig,
+  AgentState,
+  ChatMessage,
+  DefaultModalPosition,
+  LogLevel,
+} from '@viamoss/moss-sdk';
+```
+
+---
+
+## Core Types
+
+### AgentState
+
+The return type of the `useAgent()` hook. Contains all state and methods for controlling the assistant.
+
+```typescript
+interface AgentState {
+  // Connection and chat state
+  isConnected: boolean;
+  isChatOpen: boolean;
+
+  // Chat functionality
+  messages: ChatMessage[];
+  sendMessage: (text: string) => Promise<void>;
+  openChat: (defaultPosition?: DefaultModalPosition) => void;
+  closeChat: () => void;
+  toggleChat: (defaultPosition?: DefaultModalPosition) => void;
+  startNewChat: () => Promise<void>;
+
+  // Loading states
+  isWaitingForResponse: boolean;
+
+  // Feature flags
+  useVision: boolean;
+  debugMode: boolean;
+  isLanguageSelectionEnabled: boolean;
+
+  // Debug only
+  currentApiUrl?: string;
+  captureContext: () => Promise<{
+    screenshotDataUrl: string | null;
+    pageText: string | null;
+  } | null>;
+
+  // Guide mode
+  chatMode: 'chat' | 'guide';
+  suggestsGuideMode: boolean;
+  continueGuide: () => Promise<void>;
+  acceptGuideSuggestion: () => Promise<void>;
+}
+```
+
+---
+
+### ChatMessage
+
+Represents a single message in the conversation.
+
+```typescript
+interface ChatMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: number;
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Unique message identifier |
+| `sender` | `'user' \| 'assistant'` | Who sent the message |
+| `text` | `string` | Message content (may contain Markdown) |
+| `timestamp` | `number` | Unix timestamp in milliseconds |
+
+---
+
+### DefaultModalPosition
+
+Position and size configuration for the chat modal.
+
+```typescript
+interface DefaultModalPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `x` | `number` | Horizontal position from left edge (pixels) |
+| `y` | `number` | Vertical position from top edge (pixels) |
+| `width` | `number` | Modal width (pixels) |
+| `height` | `number` | Modal height (pixels) |
+
+---
+
+## Configuration Types
+
+### MossSDKConfig
+
+The configuration object passed to `AgentProvider`.
+
+```typescript
+type MossSDKConfig = {
+  // Required
+  apiUrl: string;
+  userId: string;
+} & (
+  | { applicationId: string; applicationName?: string }
+  | { applicationName: string; applicationId?: string }
+) & {
+  // Authentication
+  getJwt?: () => Promise<string>;
+  jwt?: string;
+  /** @deprecated Use getJwt instead */
+  apiKey?: string;
+
+  // Display
+  language?: 'en' | 'ko';
+  screenshotMode?: ScreenshotMode;
+  appearance?: AppearanceInput;
+
+  // Behavior
+  useVision?: boolean;
+  observeTargetSelector?: string;
+  pageSanitizationScript?: (document: Document) => void;
+  enableSessionRecording?: boolean;
+  enableScreenHistoryRecording?: boolean;
+
+  // Session
+  sessionConfig?: SessionConfig;
+
+  // Debug
+  logLevel?: LogLevel;
+  debugMode?: boolean;
+
+  // Stability
+  stability?: StabilityConfig;
+};
+```
+
+<Info>
+  At least one of `applicationId` or `applicationName` is required.
+</Info>
+
+---
+
+### ScreenshotMode
+
+How screenshots are captured for AI context.
+
+```typescript
+type ScreenshotMode = 'fullpage' | 'viewport';
+```
+
+| Value | Description |
+|-------|-------------|
+| `'fullpage'` | Captures the entire scrollable page |
+| `'viewport'` | Captures only the visible viewport |
+
+---
+
+### LogLevel
+
+Logging verbosity levels.
+
+```typescript
+enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARNING = 2,
+  ERROR = 3,
+}
+```
+
+```tsx
+import { LogLevel } from '@viamoss/moss-sdk';
+
+<AgentProvider config={{
+  // ...
+  logLevel: LogLevel.DEBUG,
+}}>
+```
+
+---
+
+### SessionConfig
+
+Configuration for session management behavior.
+
+```typescript
+interface SessionConfig {
+  /** Minutes of inactivity before starting new session (default: 30) */
+  inactivityTimeout?: number;
+  /** Hours before forcing new session (default: 2) */
+  maxSessionAge?: number;
+  /** Show notification when auto-starting session (default: true) */
+  showNotification?: boolean;
+}
+```
+
+---
+
+## Stability Types
+
+### StabilityConfig
+
+Configuration for page stability detection before context capture.
+
+```typescript
+interface StabilityConfig {
+  /** Maximum total wait time across all layers (default: 15000ms) */
+  maxTotalWaitMs?: number;
+  /** Network idle timeout (default: 10000ms) */
+  networkTimeoutMs?: number;
+  /** Browser idle timeout (default: 500ms) */
+  browserIdleTimeoutMs?: number;
+  /** Enable/disable individual layers */
+  layers?: StabilityLayersConfig;
+  /** Loading indicators layer configuration */
+  loadingIndicators?: LoadingIndicatorsLayerConfig;
+  /** Layout shift layer configuration */
+  layoutShift?: LayoutShiftLayerConfig;
+  /** DOM mutations layer configuration */
+  domMutations?: DOMMutationsLayerConfig;
+  /** After page reload handling */
+  afterReload?: AfterReloadConfig;
+}
+```
+
+---
+
+### StabilityLayersConfig
+
+Toggle individual stability detection layers.
+
+```typescript
+interface StabilityLayersConfig {
+  /** Wait for network requests to complete (default: true) */
+  networkIdle?: boolean;
+  /** Wait for DOM mutations to stop (default: true) */
+  domMutations?: boolean;
+  /** Wait for loading indicators to disappear (default: false) */
+  loadingIndicators?: boolean;
+  /** Wait for layout shifts to stop (default: false) */
+  layoutShift?: boolean;
+  /** Wait for browser idle via requestIdleCallback (default: true) */
+  browserIdle?: boolean;
+  /** Wait for one animation frame (default: true) */
+  finalFrame?: boolean;
+}
+```
+
+---
+
+## Appearance Types
+
+### AppearanceInput
+
+Visual theme configuration.
+
+```typescript
+type AppearanceInput =
+  | 'blue'      // Default theme
+  | 'purple'    // Purple theme
+  | DeepPartial<MossAppearance>;  // Custom overrides
+```
+
+```tsx
+// Use a preset
+appearance: 'purple'
+
+// Custom overrides (merged with default)
+appearance: {
+  colors: {
+    primary: '#FF5722',
+  },
+}
+```
+
+---
+
+### MossAppearance
+
+Full appearance configuration object (for custom themes).
+
+```typescript
+interface MossAppearance {
+  name: string;
+  colors: {
+    primary: string;
+    primaryLight: string;
+    primaryLighter: string;
+    // ... more color tokens
+  };
+  typography: {
+    fontFamily: string;
+    fontSize: Record<string, string>;
+    // ... more typography tokens
+  };
+  spacing: Record<string, string>;
+  radius: Record<string, string>;
+  shadows: Record<string, string>;
+  effects: {
+    glassmorphism: boolean;
+    glassBlur: string;
+  };
+  // ... more configuration
+}
+```
+
+<Tip>
+  Use `DeepPartial<MossAppearance>` when providing custom overrides. Only specify the values you want to change.
+</Tip>
+
+---
+
+## Usage Example
+
+```tsx
+import {
+  AgentProvider,
+  AssistantButton,
+  useAgent,
+  LogLevel,
+} from '@viamoss/moss-sdk';
+import type {
+  MossSDKConfig,
+  AgentState,
+  ChatMessage,
+  DefaultModalPosition,
+} from '@viamoss/moss-sdk';
+
+const config: MossSDKConfig = {
+  apiUrl: 'https://moss-api.viamoss.ai',
+  applicationId: 'your-app-id',
+  userId: 'user-123',
+  getJwt: async () => fetchToken(),
+  logLevel: LogLevel.INFO,
+};
+
+function App() {
+  return (
+    <AgentProvider config={config}>
+      <AssistantButton />
+      <ChatStatus />
+    </AgentProvider>
+  );
+}
+
+function ChatStatus() {
+  const { messages, isChatOpen }: AgentState = useAgent();
+
+  return (
+    <div>
+      <p>Chat is {isChatOpen ? 'open' : 'closed'}</p>
+      <p>{messages.length} messages</p>
+    </div>
+  );
+}
+```

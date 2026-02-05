@@ -1,0 +1,376 @@
+---
+title: "Types"
+description: "Moss SDK에서 내보내는 TypeScript 인터페이스 및 타입"
+icon: "brackets-curly"
+---
+
+# TypeScript 타입
+
+Moss SDK는 TypeScript로 작성되었으며 애플리케이션에서 사용할 수 있는 모든 공개 타입을 내보냅니다.
+
+```tsx
+import type {
+  MossSDKConfig,
+  AgentState,
+  ChatMessage,
+  DefaultModalPosition,
+  LogLevel,
+} from '@viamoss/moss-sdk';
+```
+
+---
+
+## 핵심 타입
+
+### AgentState
+
+`useAgent()` Hook의 반환 타입입니다. 어시스턴트를 제어하기 위한 모든 상태와 메서드를 포함합니다.
+
+```typescript
+interface AgentState {
+  // 연결 및 채팅 상태
+  isConnected: boolean;
+  isChatOpen: boolean;
+
+  // 채팅 기능
+  messages: ChatMessage[];
+  sendMessage: (text: string) => Promise<void>;
+  openChat: (defaultPosition?: DefaultModalPosition) => void;
+  closeChat: () => void;
+  toggleChat: (defaultPosition?: DefaultModalPosition) => void;
+  startNewChat: () => Promise<void>;
+
+  // 로딩 상태
+  isWaitingForResponse: boolean;
+
+  // 기능 플래그
+  useVision: boolean;
+  debugMode: boolean;
+  isLanguageSelectionEnabled: boolean;
+
+  // 디버그 전용
+  currentApiUrl?: string;
+  captureContext: () => Promise<{
+    screenshotDataUrl: string | null;
+    pageText: string | null;
+  } | null>;
+
+  // 가이드 모드
+  chatMode: 'chat' | 'guide';
+  suggestsGuideMode: boolean;
+  continueGuide: () => Promise<void>;
+  acceptGuideSuggestion: () => Promise<void>;
+}
+```
+
+---
+
+### ChatMessage
+
+대화의 단일 메시지를 나타냅니다.
+
+```typescript
+interface ChatMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: number;
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `id` | `string` | 고유 메시지 식별자 |
+| `sender` | `'user' \| 'assistant'` | 메시지 발신자 |
+| `text` | `string` | 메시지 내용 (Markdown 포함 가능) |
+| `timestamp` | `number` | 밀리초 단위의 Unix 타임스탬프 |
+
+---
+
+### DefaultModalPosition
+
+채팅 모달의 위치 및 크기 설정입니다.
+
+```typescript
+interface DefaultModalPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `x` | `number` | 왼쪽 가장자리로부터의 수평 위치 (픽셀) |
+| `y` | `number` | 상단 가장자리로부터의 수직 위치 (픽셀) |
+| `width` | `number` | 모달 너비 (픽셀) |
+| `height` | `number` | 모달 높이 (픽셀) |
+
+---
+
+## 설정 타입
+
+### MossSDKConfig
+
+`AgentProvider`에 전달되는 설정 객체입니다.
+
+```typescript
+type MossSDKConfig = {
+  // 필수
+  apiUrl: string;
+  userId: string;
+} & (
+  | { applicationId: string; applicationName?: string }
+  | { applicationName: string; applicationId?: string }
+) & {
+  // 인증
+  getJwt?: () => Promise<string>;
+  jwt?: string;
+  /** @deprecated getJwt를 대신 사용하세요 */
+  apiKey?: string;
+
+  // 표시
+  language?: 'en' | 'ko';
+  screenshotMode?: ScreenshotMode;
+  appearance?: AppearanceInput;
+
+  // 동작
+  useVision?: boolean;
+  observeTargetSelector?: string;
+  pageSanitizationScript?: (document: Document) => void;
+  enableSessionRecording?: boolean;
+  enableScreenHistoryRecording?: boolean;
+
+  // 세션
+  sessionConfig?: SessionConfig;
+
+  // 디버그
+  logLevel?: LogLevel;
+  debugMode?: boolean;
+
+  // 안정성
+  stability?: StabilityConfig;
+};
+```
+
+<Info>
+  `applicationId` 또는 `applicationName` 중 하나는 필수입니다.
+</Info>
+
+---
+
+### ScreenshotMode
+
+AI 컨텍스트용 스크린샷 캡처 방식입니다.
+
+```typescript
+type ScreenshotMode = 'fullpage' | 'viewport';
+```
+
+| 값 | 설명 |
+|----|------|
+| `'fullpage'` | 스크롤 가능한 전체 페이지를 캡처 |
+| `'viewport'` | 보이는 뷰포트만 캡처 |
+
+---
+
+### LogLevel
+
+로깅 상세 수준입니다.
+
+```typescript
+enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARNING = 2,
+  ERROR = 3,
+}
+```
+
+```tsx
+import { LogLevel } from '@viamoss/moss-sdk';
+
+<AgentProvider config={{
+  // ...
+  logLevel: LogLevel.DEBUG,
+}}>
+```
+
+---
+
+### SessionConfig
+
+세션 관리 동작 설정입니다.
+
+```typescript
+interface SessionConfig {
+  /** 새 세션 시작까지의 비활성 시간 (분, 기본값: 30) */
+  inactivityTimeout?: number;
+  /** 강제 새 세션까지의 시간 (시간, 기본값: 2) */
+  maxSessionAge?: number;
+  /** 자동 세션 시작 시 알림 표시 (기본값: true) */
+  showNotification?: boolean;
+}
+```
+
+---
+
+## 안정성 타입
+
+### StabilityConfig
+
+컨텍스트 캡처 전 페이지 안정성 감지 설정입니다.
+
+```typescript
+interface StabilityConfig {
+  /** 모든 레이어에 걸친 최대 총 대기 시간 (기본값: 15000ms) */
+  maxTotalWaitMs?: number;
+  /** 네트워크 유휴 타임아웃 (기본값: 10000ms) */
+  networkTimeoutMs?: number;
+  /** 브라우저 유휴 타임아웃 (기본값: 500ms) */
+  browserIdleTimeoutMs?: number;
+  /** 개별 레이어 활성화/비활성화 */
+  layers?: StabilityLayersConfig;
+  /** 로딩 인디케이터 레이어 설정 */
+  loadingIndicators?: LoadingIndicatorsLayerConfig;
+  /** 레이아웃 시프트 레이어 설정 */
+  layoutShift?: LayoutShiftLayerConfig;
+  /** DOM 변경 레이어 설정 */
+  domMutations?: DOMMutationsLayerConfig;
+  /** 페이지 리로드 후 처리 */
+  afterReload?: AfterReloadConfig;
+}
+```
+
+---
+
+### StabilityLayersConfig
+
+개별 안정성 감지 레이어를 토글합니다.
+
+```typescript
+interface StabilityLayersConfig {
+  /** 네트워크 요청 완료 대기 (기본값: true) */
+  networkIdle?: boolean;
+  /** DOM 변경 중지 대기 (기본값: true) */
+  domMutations?: boolean;
+  /** 로딩 인디케이터 사라짐 대기 (기본값: false) */
+  loadingIndicators?: boolean;
+  /** 레이아웃 시프트 중지 대기 (기본값: false) */
+  layoutShift?: boolean;
+  /** requestIdleCallback을 통한 브라우저 유휴 대기 (기본값: true) */
+  browserIdle?: boolean;
+  /** 애니메이션 프레임 하나 대기 (기본값: true) */
+  finalFrame?: boolean;
+}
+```
+
+---
+
+## 외관 타입
+
+### AppearanceInput
+
+시각적 테마 설정입니다.
+
+```typescript
+type AppearanceInput =
+  | 'blue'      // 기본 테마
+  | 'purple'    // 퍼플 테마
+  | DeepPartial<MossAppearance>;  // 커스텀 오버라이드
+```
+
+```tsx
+// 프리셋 사용
+appearance: 'purple'
+
+// 커스텀 오버라이드 (기본값과 병합됨)
+appearance: {
+  colors: {
+    primary: '#FF5722',
+  },
+}
+```
+
+---
+
+### MossAppearance
+
+전체 외관 설정 객체입니다 (커스텀 테마용).
+
+```typescript
+interface MossAppearance {
+  name: string;
+  colors: {
+    primary: string;
+    primaryLight: string;
+    primaryLighter: string;
+    // ... 더 많은 색상 토큰
+  };
+  typography: {
+    fontFamily: string;
+    fontSize: Record<string, string>;
+    // ... 더 많은 타이포그래피 토큰
+  };
+  spacing: Record<string, string>;
+  radius: Record<string, string>;
+  shadows: Record<string, string>;
+  effects: {
+    glassmorphism: boolean;
+    glassBlur: string;
+  };
+  // ... 더 많은 설정
+}
+```
+
+<Tip>
+  커스텀 오버라이드를 제공할 때는 `DeepPartial<MossAppearance>`를 사용하세요. 변경하려는 값만 지정하면 됩니다.
+</Tip>
+
+---
+
+## 사용 예시
+
+```tsx
+import {
+  AgentProvider,
+  AssistantButton,
+  useAgent,
+  LogLevel,
+} from '@viamoss/moss-sdk';
+import type {
+  MossSDKConfig,
+  AgentState,
+  ChatMessage,
+  DefaultModalPosition,
+} from '@viamoss/moss-sdk';
+
+const config: MossSDKConfig = {
+  apiUrl: 'https://moss-api.viamoss.ai',
+  applicationId: 'your-app-id',
+  userId: 'user-123',
+  getJwt: async () => fetchToken(),
+  logLevel: LogLevel.INFO,
+};
+
+function App() {
+  return (
+    <AgentProvider config={config}>
+      <AssistantButton />
+      <ChatStatus />
+    </AgentProvider>
+  );
+}
+
+function ChatStatus() {
+  const { messages, isChatOpen }: AgentState = useAgent();
+
+  return (
+    <div>
+      <p>채팅 {isChatOpen ? '열림' : '닫힘'}</p>
+      <p>{messages.length}개의 메시지</p>
+    </div>
+  );
+}
+```

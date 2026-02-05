@@ -40,6 +40,13 @@
               "en/sdk/installation",
               "en/sdk/authentication",
               "en/sdk/configuration",
+              {
+                "group": "API Reference",
+                "pages": [
+                  "en/sdk/api/hooks",
+                  "en/sdk/api/types"
+                ]
+              },
               "en/sdk/advanced"
             ]
           },
@@ -81,6 +88,13 @@
               "ko/sdk/installation",
               "ko/sdk/authentication",
               "ko/sdk/configuration",
+              {
+                "group": "API Reference",
+                "pages": [
+                  "ko/sdk/api/hooks",
+                  "ko/sdk/api/types"
+                ]
+              },
               "ko/sdk/advanced"
             ]
           },

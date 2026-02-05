@@ -1,0 +1,310 @@
+---
+title: "Hooks"
+description: "React hooks for programmatic control of the Moss assistant"
+icon: "code"
+---
+
+# React Hooks
+
+The Moss SDK exports React hooks for programmatic control of the assistant UI. Use these when you need more control than the declarative `data-moss-trigger` attribute provides.
+
+## useAgent
+
+The primary hook for interacting with the Moss assistant. Must be used within an `AgentProvider`.
+
+```tsx
+import { useAgent } from '@viamoss/moss-sdk';
+
+function MyComponent() {
+  const {
+    isChatOpen,
+    openChat,
+    closeChat,
+    toggleChat,
+    messages,
+    sendMessage,
+    isConnected,
+    isWaitingForResponse,
+  } = useAgent();
+
+  return (
+    <button onClick={() => openChat()}>
+      Open Assistant
+    </button>
+  );
+}
+```
+
+---
+
+## Return Value
+
+`useAgent()` returns an `AgentState` object with the following properties and methods:
+
+### State Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isConnected` | `boolean` | Whether the SDK is connected to the backend |
+| `isChatOpen` | `boolean` | Whether the chat modal is currently open |
+| `messages` | `ChatMessage[]` | Array of messages in the current conversation |
+| `isWaitingForResponse` | `boolean` | Whether the assistant is processing a response |
+| `chatMode` | `'chat' \| 'guide'` | Current conversation mode |
+| `suggestsGuideMode` | `boolean` | Whether the assistant has suggested switching to guide mode |
+| `useVision` | `boolean` | Whether vision (screenshot analysis) is enabled |
+| `debugMode` | `boolean` | Whether debug mode is enabled |
+
+### Chat Control Methods
+
+#### `openChat(position?)`
+
+Opens the chat modal. No-op if already open.
+
+```tsx
+const { openChat } = useAgent();
+
+// Open with default position
+openChat();
+
+// Open with custom position
+openChat({ x: 100, y: 100, width: 400, height: 600 });
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `position` | `DefaultModalPosition` | Optional. Initial position and size |
+
+---
+
+#### `closeChat()`
+
+Closes the chat modal. No-op if already closed.
+
+```tsx
+const { closeChat } = useAgent();
+
+closeChat();
+```
+
+---
+
+#### `toggleChat(position?)`
+
+Toggles the chat modal open/closed.
+
+```tsx
+const { toggleChat } = useAgent();
+
+// Toggle with default position
+toggleChat();
+
+// Toggle with custom position (applied when opening)
+toggleChat({ x: 100, y: 100, width: 400, height: 600 });
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `position` | `DefaultModalPosition` | Optional. Position when opening |
+
+---
+
+#### `sendMessage(text)`
+
+Sends a message to the assistant programmatically.
+
+```tsx
+const { sendMessage } = useAgent();
+
+await sendMessage('How do I create a new project?');
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `text` | `string` | The message to send |
+
+**Returns:** `Promise<void>`
+
+---
+
+#### `startNewChat()`
+
+Clears the current conversation and starts a new chat session.
+
+```tsx
+const { startNewChat } = useAgent();
+
+await startNewChat();
+```
+
+**Returns:** `Promise<void>`
+
+---
+
+### Guide Mode Methods
+
+#### `continueGuide()`
+
+Advances to the next step in guide mode. Equivalent to clicking the "Next" button.
+
+```tsx
+const { continueGuide, chatMode } = useAgent();
+
+if (chatMode === 'guide') {
+  await continueGuide();
+}
+```
+
+**Returns:** `Promise<void>`
+
+---
+
+#### `acceptGuideSuggestion()`
+
+Accepts the assistant's suggestion to switch to guide mode. Equivalent to clicking "Start Guide".
+
+```tsx
+const { acceptGuideSuggestion, suggestsGuideMode } = useAgent();
+
+if (suggestsGuideMode) {
+  await acceptGuideSuggestion();
+}
+```
+
+**Returns:** `Promise<void>`
+
+---
+
+### Debug Methods
+
+#### `captureContext()`
+
+Manually captures the current page context (screenshot and DOM). Only useful for debugging.
+
+```tsx
+const { captureContext, debugMode } = useAgent();
+
+if (debugMode) {
+  const context = await captureContext();
+  console.log(context?.screenshotDataUrl);
+  console.log(context?.pageText);
+}
+```
+
+**Returns:** `Promise<{ screenshotDataUrl: string | null; pageText: string | null } | null>`
+
+---
+
+## Examples
+
+### Custom Help Button
+
+```tsx
+import { useAgent } from '@viamoss/moss-sdk';
+
+function HelpButton() {
+  const { openChat, isChatOpen } = useAgent();
+
+  return (
+    <button
+      onClick={() => openChat()}
+      disabled={isChatOpen}
+    >
+      {isChatOpen ? 'Chat Open' : 'Need Help?'}
+    </button>
+  );
+}
+```
+
+### Keyboard Shortcut
+
+```tsx
+import { useEffect } from 'react';
+import { useAgent } from '@viamoss/moss-sdk';
+
+function KeyboardShortcut() {
+  const { toggleChat } = useAgent();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K to toggle chat
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        toggleChat();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleChat]);
+
+  return null;
+}
+```
+
+### Message Counter Badge
+
+```tsx
+import { useAgent } from '@viamoss/moss-sdk';
+
+function MessageBadge() {
+  const { messages, openChat } = useAgent();
+  const unreadCount = messages.filter(m => m.sender === 'assistant').length;
+
+  return (
+    <button onClick={() => openChat()} className="relative">
+      Help
+      {unreadCount > 0 && (
+        <span className="badge">{unreadCount}</span>
+      )}
+    </button>
+  );
+}
+```
+
+### Conditional Send with Loading State
+
+```tsx
+import { useState } from 'react';
+import { useAgent } from '@viamoss/moss-sdk';
+
+function QuickQuestion() {
+  const { sendMessage, openChat, isWaitingForResponse } = useAgent();
+  const [question, setQuestion] = useState('');
+
+  const handleSubmit = async () => {
+    if (!question.trim()) return;
+    openChat();
+    await sendMessage(question);
+    setQuestion('');
+  };
+
+  return (
+    <div>
+      <input
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Ask a quick question..."
+        disabled={isWaitingForResponse}
+      />
+      <button
+        onClick={handleSubmit}
+        disabled={isWaitingForResponse || !question.trim()}
+      >
+        {isWaitingForResponse ? 'Sending...' : 'Ask'}
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## Notes
+
+<Warning>
+  `useAgent()` must be called within an `AgentProvider`. Calling it outside will throw an error.
+</Warning>
+
+<Info>
+  The hook returns stable function references. You can safely include them in dependency arrays without causing unnecessary re-renders.
+</Info>
