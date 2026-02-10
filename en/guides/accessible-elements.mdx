@@ -1,0 +1,156 @@
+---
+title: "Labeling Interactive Elements"
+description: "How to add accessible labels to icon-only buttons so Moss can identify and guide users to them"
+icon: "tag"
+---
+
+# Labeling Interactive Elements
+
+Moss identifies interactive elements on the page by their accessible names. When a button contains only an SVG icon and no visible text, Moss cannot determine what the button does and will be unable to reference it in guided instructions.
+
+Adding an `aria-label` to icon-only buttons fixes this and also improves accessibility for screen reader users.
+
+## The Problem
+
+Buttons that contain only an SVG icon have no accessible name:
+
+```html
+<!-- Moss cannot identify this button -->
+<button>
+  <svg viewBox="0 0 24 24">
+    <path d="M6 19c0 ..." />
+  </svg>
+</button>
+```
+
+When Moss encounters these elements, it cannot generate clear instructions like _"Click the Delete button"_ because there is no label to reference.
+
+## The Fix
+
+Add an `aria-label` attribute that describes what the button does:
+
+```html
+<button aria-label="Delete item">
+  <svg aria-hidden="true" viewBox="0 0 24 24">
+    <path d="M6 19c0 ..." />
+  </svg>
+</button>
+```
+
+<Info>
+  Adding `aria-hidden="true"` to the SVG marks it as decorative. The button's `aria-label` carries the meaning instead.
+</Info>
+
+## Using Component Libraries
+
+If you use a component library and don't manage raw HTML elements directly, `aria-label` still works. React forwards all `aria-*` props to the underlying DOM element, so this applies to any component that renders a clickable element.
+
+<Tabs>
+  <Tab title="MUI">
+    ```tsx
+    import { IconButton } from '@mui/material';
+    import DeleteIcon from '@mui/icons-material/Delete';
+
+    <IconButton aria-label="Delete item">
+      <DeleteIcon />
+    </IconButton>
+    ```
+  </Tab>
+  <Tab title="Chakra UI">
+    ```tsx
+    import { IconButton } from '@chakra-ui/react';
+    import { CloseIcon } from '@chakra-ui/icons';
+
+    <IconButton aria-label="Close dialog" icon={<CloseIcon />} />
+    ```
+  </Tab>
+  <Tab title="Ant Design">
+    ```tsx
+    import { Button } from 'antd';
+    import { EditOutlined } from '@ant-design/icons';
+
+    <Button aria-label="Edit profile" icon={<EditOutlined />} />
+    ```
+  </Tab>
+  <Tab title="Radix / shadcn/ui">
+    ```tsx
+    import { Button } from '@/components/ui/button';
+    import { GearIcon } from '@radix-ui/react-icons';
+
+    <Button aria-label="Settings" variant="ghost" size="icon">
+      <GearIcon />
+    </Button>
+    ```
+  </Tab>
+</Tabs>
+
+### Custom Icon Button Components
+
+If your team has a shared icon button wrapper, make sure it passes through `aria-label` by spreading rest props onto the underlying element:
+
+```tsx
+function IconButton({ icon, ...props }) {
+  return (
+    <button {...props}>
+      {icon}
+    </button>
+  );
+}
+
+// Usage
+<IconButton aria-label="Download report" icon={<DownloadIcon />} />
+```
+
+### Buttons With Tooltips
+
+If a button already has a tooltip, use that same text as the `aria-label`:
+
+```tsx
+<Tooltip content="Delete">
+  <IconButton aria-label="Delete">
+    <TrashIcon />
+  </IconButton>
+</Tooltip>
+```
+
+## Writing Good Labels
+
+| Do | Don't |
+|---|---|
+| `aria-label="Delete item"` | `aria-label="trash icon"` |
+| `aria-label="Close dialog"` | `aria-label="X"` |
+| `aria-label="Download report"` | `aria-label="button"` |
+| `aria-label="Open settings"` | `aria-label="gear"` |
+
+- **Describe the action**, not the icon. Users and Moss need to know what the button _does_.
+- **Keep it concise** — 1 to 3 words is usually enough.
+- **Skip the label if visible text exists.** A button that already says "Save" next to an icon does not need `aria-label`.
+
+## Finding Unlabeled Buttons
+
+Run this snippet in your browser console to find buttons that need labels:
+
+```js
+document.querySelectorAll('button, [role="button"]').forEach(el => {
+  const hasText = el.textContent?.trim().length > 0;
+  const hasLabel = el.getAttribute('aria-label');
+  const hasLabelledBy = el.getAttribute('aria-labelledby');
+  if (!hasText && !hasLabel && !hasLabelledBy) {
+    console.warn('Unlabeled button:', el);
+  }
+});
+```
+
+<Tip>
+  Run this on each major page of your application to get a full inventory of buttons that need labeling.
+</Tip>
+
+## Summary
+
+| What to do | Why |
+|---|---|
+| Add `aria-label` to every icon-only button | Moss reads this to identify buttons in guided instructions |
+| Add `aria-hidden="true"` to decorative SVGs | Prevents screen readers from announcing the SVG path data |
+| Use action-oriented labels | Produces clear instructions like "Click **Delete item**" |
+
+This is also a [WCAG 2.1 requirement](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value.html) (Success Criterion 4.1.2: Name, Role, Value), so adding these labels improves accessibility for all users.

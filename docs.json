@@ -68,6 +68,12 @@
               "en/security/audit-logging",
               "en/security/compliance"
             ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "en/guides/accessible-elements"
+            ]
           }
         ]
       },
@@ -115,6 +121,12 @@
               "ko/security/data-protection",
               "ko/security/audit-logging",
               "ko/security/compliance"
+            ]
+          },
+          {
+            "group": "가이드",
+            "pages": [
+              "ko/guides/accessible-elements"
             ]
           }
         ]
