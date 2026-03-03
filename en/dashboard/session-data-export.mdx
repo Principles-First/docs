@@ -1,0 +1,99 @@
+---
+title: "Session Data Export"
+description: "Export session conversation data from the Moss Dashboard"
+icon: "table"
+---
+
+## Overview
+
+Export session conversation data from the Sessions view in Dashboard as CSV or JSON.
+
+**Supported formats:** `csv`, `json`  
+**Row model:** One row per user-facing message (`user_query`, `assistant_response`, `system_continuation`)  
+**Hard limit:** `10,000` rows per export request
+
+If the export query would exceed 10,000 rows, the API returns:
+
+```text
+Export exceeds 10000 rows (<count> found). Please narrow your filters.
+```
+
+Use filters (date range, user, last activity, evaluation rating) to reduce the result set.
+
+## Export Columns
+
+The sessions export includes:
+
+- `session_id`
+- `user_id`
+- `session_created_at`
+- `message_sequence` (re-numbered per session for exported rows only)
+- `message_type`
+- `message_content`
+- `message_created_at`
+- `evaluation_rating`
+- `evaluation_comment`
+
+## Message Type Descriptions
+
+The sessions export includes only user-facing message types:
+
+- `user_query`: A direct user question or prompt submitted in chat.
+- `system_continuation`: A user-triggered continuation event (for example, after completing an interaction step) that continues the same conversational turn.
+- `assistant_response`: The AI assistant response payload. In exports, this is stored in `message_content` as a serialized JSON object (schema below).
+
+## `assistant_response` Message Content Schema
+
+For rows where `message_type = "assistant_response"`, `message_content` is stored as a JSON object serialized to string.
+The canonical schema is:
+
+```json
+{
+  "guidance_text": "string (required)",
+  "target_node_ids": ["string"],
+  "interaction_type": "click | input | change | null",
+  "suggests_interactive_guide": false,
+  "plan": {
+    "goal": "string",
+    "steps": [
+      {
+        "order": 1,
+        "title": "string",
+        "description": "string | null",
+        "target_component_label": "string | null",
+        "status": "pending | current | completed | skipped"
+      }
+    ],
+    "current_step_index": 0,
+    "status": "in_progress | completed | abandoned"
+  },
+  "step_update": {
+    "step_id": "uuid",
+    "new_status": "pending | current | completed | skipped"
+  },
+  "step_updates": [
+    {
+      "step_id": "uuid",
+      "new_status": "pending | current | completed | skipped"
+    }
+  ]
+}
+```
+
+`guidance_text` is required; all other fields are optional and appear only when relevant to the response.
+
+## Example `assistant_response` in JSON Export
+
+```json
+{
+  "session_id": "cs_abc123",
+  "user_id": "user_42",
+  "session_created_at": "2026-03-03T11:58:04.987654+00:00",
+  "message_sequence": 2,
+  "message_type": "assistant_response",
+  "message_content": "{\"guidance_text\":\"Click Save in the top-right corner.\",\"target_node_ids\":[\"e7f2c9b4-3d9b-49e7-a8f0-2b1f4fd8b9d1\"],\"interaction_type\":\"click\",\"suggests_interactive_guide\":false}",
+  "message_created_at": "2026-03-03T11:58:07.120000+00:00",
+  "evaluation_rating": "helpful",
+  "evaluation_comment": ""
+}
+```

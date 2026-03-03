@@ -1,0 +1,31 @@
+---
+title: "Session"
+description: "SDK 세션 관련 설정과 동작"
+icon: "message"
+---
+
+## Session Configuration
+
+`sessionConfig`로 세션 유지 시간과 새 세션 생성 시점을 제어할 수 있습니다.
+
+```ts
+sessionConfig: {
+  inactivityTimeout: 30,  // 비활성 상태에서 세션 만료까지의 분
+  maxSessionAge: 2,       // 강제로 새 세션을 시작하기까지의 시간(시간)
+  showNotification: true, // 새 세션 시작 시 알림 표시 여부
+}
+```
+
+## Session Recording
+
+`enableSessionRecording`으로 세션 리플레이 업로드 여부를 제어할 수 있습니다.
+
+```ts
+enableSessionRecording: true
+```
+
+## Related References
+
+- 전체 타입 정의: [Types](/ko/sdk/api/types)
+- 훅 사용법: [Hooks](/ko/sdk/api/hooks)
+- 대시보드 기본값: [Dashboard Settings](/ko/configurations/dashboard-settings)

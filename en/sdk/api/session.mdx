@@ -1,0 +1,31 @@
+---
+title: "Session"
+description: "Session-related SDK configuration and behavior"
+icon: "message"
+---
+
+## Session Configuration
+
+Use `sessionConfig` to control how long user conversations stay active and when a new session should be created.
+
+```ts
+sessionConfig: {
+  inactivityTimeout: 30,  // Minutes before session expires due to inactivity
+  maxSessionAge: 2,       // Hours before forcing a new session
+  showNotification: true, // Show notification when a new session starts
+}
+```
+
+## Session Recording
+
+Use `enableSessionRecording` to control whether recording data is uploaded to Dashboard for replay.
+
+```ts
+enableSessionRecording: true
+```
+
+## Related References
+
+- Full type definitions: [Types](/en/sdk/api/types)
+- Hook usage patterns: [Hooks](/en/sdk/api/hooks)
+- Dashboard-level defaults: [Dashboard Settings](/en/configurations/dashboard-settings)

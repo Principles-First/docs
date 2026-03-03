@@ -43,11 +43,18 @@
               {
                 "group": "API Reference",
                 "pages": [
+                  "en/sdk/api/session",
                   "en/sdk/api/hooks",
                   "en/sdk/api/types"
                 ]
               },
               "en/sdk/advanced"
+            ]
+          },
+          {
+            "group": "Dashboard",
+            "pages": [
+              "en/dashboard/session-data-export"
             ]
           },
           {
@@ -97,11 +104,18 @@
               {
                 "group": "API Reference",
                 "pages": [
+                  "ko/sdk/api/session",
                   "ko/sdk/api/hooks",
                   "ko/sdk/api/types"
                 ]
               },
               "ko/sdk/advanced"
+            ]
+          },
+          {
+            "group": "대시보드",
+            "pages": [
+              "ko/dashboard/session-data-export"
             ]
           },
           {
