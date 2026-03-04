@@ -1,0 +1,43 @@
+---
+title: "Settings Reference"
+description: "Quick reference for Moss Dashboard and SDK configuration options"
+icon: "list"
+---
+
+## Core Features
+
+| Setting | Type | Default | Location |
+|---|---|---|---|
+| `enableVision` | `boolean` | `true` | Dashboard + SDK |
+| `enableSessionRecording` | `boolean` | `true` | Dashboard + SDK |
+| `enableScreenHistory` | `boolean` | `true` | Dashboard + SDK |
+
+## Session
+
+| Setting | Type | Default | Location |
+|---|---|---|---|
+| `sessionConfig.inactivityTimeout` | `number` (minutes) | `30` | Dashboard + SDK |
+| `sessionConfig.maxSessionAge` | `number` (hours) | `2` | Dashboard + SDK |
+| `sessionConfig.showNotification` | `boolean` | `true` | Dashboard + SDK |
+
+## Planning
+
+| Setting | Type | Default | Location |
+|---|---|---|---|
+| `planningConfig.enablePlanning` | `boolean` | `false` | Dashboard + SDK |
+| `planningConfig.maxSteps` | `number` | `10` | Dashboard + SDK |
+| `planningConfig.allowUserSkip` | `boolean` | `true` | Dashboard + SDK |
+| `planningConfig.showPlanOverview` | `boolean` | `true` | Dashboard + SDK |
+
+## Dashboard-Only
+
+- API key management
+- Domain access control
+- Vector store configuration
+- AI assistant instructions
+
+## Related Docs
+
+- [Dashboard Settings](/en/configurations/dashboard-settings)
+- [SDK Options](/en/configurations/sdk-options)
+- [Runtime API](/en/configurations/runtime-api)

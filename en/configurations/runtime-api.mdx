@@ -1,0 +1,51 @@
+---
+title: "Runtime API"
+description: "Update Moss application configuration dynamically via API"
+icon: "bolt"
+---
+
+## Overview
+
+Use the Runtime API to update application-level configuration without shipping a new frontend build.
+
+Typical runtime updates include:
+
+- Language and UX defaults
+- Vision and session recording toggles
+- Planning and session behavior
+
+## Endpoint
+
+Update configuration for an application:
+
+```http
+PUT /api/v1/applications/{applicationId}/config
+```
+
+This endpoint updates the same configuration model used by Dashboard settings.
+
+<Note>
+    Runtime API updates apply at the application level. SDK-provided config still
+    has higher priority for active client sessions.
+</Note>
+
+## Request Example
+
+```json
+{
+  "language": "en",
+  "enable_vision": true,
+  "enable_session_recording": true,
+  "session_config": {
+    "inactivity_timeout": 30,
+    "max_session_age": 2,
+    "show_notification": true
+  }
+}
+```
+
+## Related Docs
+
+- [Dashboard Settings](/en/configurations/dashboard-settings)
+- [SDK Options](/en/configurations/sdk-options)
+- [Settings Reference](/en/configurations/settings-reference)

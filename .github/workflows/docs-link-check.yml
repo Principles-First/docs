@@ -1,0 +1,30 @@
+name: Docs Link Check
+
+on:
+  pull_request:
+    paths:
+      - "en/**"
+      - "ko/**"
+      - "docs.json"
+      - "scripts/check-internal-links.sh"
+      - ".github/workflows/docs-link-check.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "en/**"
+      - "ko/**"
+      - "docs.json"
+      - "scripts/check-internal-links.sh"
+      - ".github/workflows/docs-link-check.yml"
+
+jobs:
+  internal-link-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate internal docs links
+        run: bash scripts/check-internal-links.sh

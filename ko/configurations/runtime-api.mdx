@@ -1,0 +1,51 @@
+---
+title: "런타임 API"
+description: "API로 Moss 애플리케이션 설정을 동적으로 업데이트하는 방법"
+icon: "bolt"
+---
+
+## 개요
+
+런타임 API를 사용하면 프런트엔드 재배포 없이 애플리케이션 수준 설정을 업데이트할 수 있습니다.
+
+대표적인 런타임 업데이트 항목:
+
+- 언어 및 UX 기본값
+- 비전/세션 리플레이 토글
+- 플래닝/세션 동작
+
+## 엔드포인트
+
+애플리케이션 설정 업데이트:
+
+```http
+PUT /api/v1/applications/{applicationId}/config
+```
+
+이 엔드포인트는 대시보드 설정과 동일한 구성 모델을 업데이트합니다.
+
+<Note>
+    런타임 API 업데이트는 애플리케이션 레벨에 적용됩니다. 활성 세션에서는
+    SDK 코드에서 전달한 설정이 더 높은 우선순위를 가집니다.
+</Note>
+
+## 요청 예시
+
+```json
+{
+  "language": "ko",
+  "enable_vision": true,
+  "enable_session_recording": true,
+  "session_config": {
+    "inactivity_timeout": 30,
+    "max_session_age": 2,
+    "show_notification": true
+  }
+}
+```
+
+## 관련 문서
+
+- [Dashboard Settings](/ko/configurations/dashboard-settings)
+- [SDK 옵션](/ko/configurations/sdk-options)
+- [설정 참조](/ko/configurations/settings-reference)
