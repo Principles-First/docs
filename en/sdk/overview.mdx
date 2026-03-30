@@ -34,14 +34,40 @@ Both methods provide the same assistant UI and functionality. Choose based on yo
 
 When the assistant needs context about the current page, the SDK captures:
 
-- **Visible text content** from the DOM
-- **Interactive elements** (buttons, links, form fields) with their labels and states
+- **Interactive elements** (buttons, links, form fields) with their visible text labels and states
 - **A screenshot** of the page (configurable: full page or viewport only)
 - **Page URL and metadata**
 
+### What Is Not Captured
+
+The SDK does **not** access or transmit:
+
+- **Cookies** — the SDK never reads `document.cookie`
+- **localStorage or sessionStorage** — only its own prefixed keys (`moss_*`) are used; your application's storage is not read
+- **Password field values** — `<input type="password">` values are excluded
+- **Hidden elements** — elements with `display: none`, `visibility: hidden`, or the `inert` attribute are filtered out
+- **Non-interactive content** — general page text (paragraphs, headings, divs) is not included in the structured context sent to the backend
+- **Closed Shadow DOM content** — elements inside closed shadow roots are inaccessible to the SDK
+- **Cross-origin iframe content** — iframes from different origins are opaque per browser same-origin policy
+
 <Info>
-    All data is sent over HTTPS to your configured Moss backend. No data is stored in the browser beyond the current session.
+    All data is sent over HTTPS REST endpoints to your configured Moss backend. No WebSocket connections are used. No data is stored in the browser beyond the current session.
 </Info>
+
+## Element Highlighting and Coach Marks
+
+When the AI provides step-by-step guidance, the SDK can visually highlight elements on the host page to show users exactly where to click or interact.
+
+**How it works:**
+
+- The SDK applies a CSS class directly to target elements in the host DOM, adding a pulsing outline to draw attention
+- When multiple elements are highlighted, numbered badges (1, 2, 3...) appear next to each element, matching the numbered steps in the assistant's instructions
+- Badges are positioned using fixed viewport coordinates and automatically reposition on scroll or resize
+- Highlights are cleared when the user moves to the next step or dismisses the assistant
+
+**Coach marks** are small contextual tooltips that appear near UI elements to provide additional guidance. They auto-dismiss on external click and are session-scoped (shown once per session).
+
+Highlighting does not modify the host DOM structure — it only adds and removes CSS classes and lightweight badge elements.
 
 ## Next Steps
 

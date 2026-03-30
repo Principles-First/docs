@@ -158,9 +158,38 @@ This is useful when:
 
 ---
 
-## Page Sanitization
+## Redacting Sensitive Content
 
-Remove sensitive content from the DOM before the SDK captures context:
+### Declarative Redaction with `data-moss-redact`
+
+Mark any HTML element with the `data-moss-redact` attribute to redact it from all data sent to the Moss backend. This is the simplest way to protect sensitive content.
+
+```html
+<div data-moss-redact>
+  <p>Account balance: $12,340.56</p>
+  <p>SSN: 123-45-6789</p>
+</div>
+```
+
+**What gets redacted:**
+
+- **Text content** — replaced with `[REDACTED]` in the structured context sent to the backend
+- **Sensitive attributes** — `value`, `placeholder`, `title`, `alt`, `aria-label`, `href`, `src`, and `name` are all redacted
+- **Child elements** — all descendants of a redacted element are excluded
+
+Redaction applies to the marked element and any of its ancestors up to 10 levels deep, so you can mark a container to redact everything inside it.
+
+```html
+<!-- All form fields inside this section are redacted -->
+<section data-moss-redact>
+  <input type="text" placeholder="Card number" />
+  <input type="text" placeholder="CVV" />
+</section>
+```
+
+### Programmatic Sanitization
+
+For more complex sanitization logic, use `pageSanitizationScript` to modify a cloned copy of the DOM before capture:
 
 ```tsx
 <AgentProvider config={{
@@ -177,7 +206,7 @@ Remove sensitive content from the DOM before the SDK captures context:
 ```
 
 <Warning>
-    The sanitization function runs on a cloned document, not the live DOM. Your users won't see any changes — this only affects what the AI sees.
+    Both methods only affect what the AI sees. The live DOM is never modified — your users won't see any changes.
 </Warning>
 
 ---
