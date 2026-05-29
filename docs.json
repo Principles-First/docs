@@ -40,6 +40,7 @@
               "en/sdk/installation",
               "en/sdk/authentication",
               "en/sdk/configuration",
+              "en/sdk/forced-workflow",
               {
                 "group": "API Reference",
                 "pages": [
@@ -101,6 +102,7 @@
               "ko/sdk/installation",
               "ko/sdk/authentication",
               "ko/sdk/configuration",
+              "ko/sdk/forced-workflow",
               {
                 "group": "API Reference",
                 "pages": [

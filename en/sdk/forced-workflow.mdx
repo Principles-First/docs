@@ -1,0 +1,160 @@
+---
+title: "Forced Workflow"
+description: "Start a prepared Moss guide automatically for selected users"
+icon: "route"
+---
+
+# Forced Workflow
+
+Forced Workflow starts a prepared Moss guide automatically for selected users.
+Use it when the assistant should open proactively instead of waiting for the
+user to click the assistant button.
+
+<Warning>
+  Forced Workflow is currently a beta feature. Review the flow setup with Moss
+  before enabling it in production.
+</Warning>
+
+<Info>
+  The `activationQuery`, page matching rules, and copy should match the guide
+  configured in Moss.
+</Info>
+
+For a standard SDK installation, omit `forcedActivationFlow`.
+
+## Before You Start
+
+You need:
+
+- A working SDK installation with `apiUrl`, `applicationId`, `userId`, and `getJwt`
+- A Moss guide configured for each `activationQuery`
+- A user or experiment flag that decides who should see the flow
+- A route or DOM condition that decides where the flow should appear
+
+## Basic Setup
+
+Add `displayMode`, `headless`, optional `stability.afterReload`, and
+`forcedActivationFlow` to your existing `AgentProvider` config.
+
+```tsx App.tsx
+import { AgentProvider, AssistantButton } from "@viamoss/moss-sdk";
+
+function shouldStartWorkflow({ url }: { url: URL; document: Document }) {
+  return url.pathname === "/";
+}
+
+function App() {
+  return (
+    <>
+      <YourApp />
+      <AgentProvider
+        config={{
+          apiUrl: "https://clippy-api.viamoss.ai",
+          applicationId: "YOUR_APP_ID",
+          userId: currentUser.id,
+          getJwt: () => fetchMossToken(),
+
+          displayMode: "headless",
+          headless: {
+            spotlight: true,
+            animatedCursor: true,
+            completionToast: {
+              enabled: true,
+              message: "Workflow complete.",
+            },
+          },
+          stability: {
+            afterReload: {
+              enabled: true,
+              pendingTTL: 60000,
+            },
+          },
+          forcedActivationFlow: {
+            enabled: currentUser.isNewUser,
+            triggerOn: "first_visit",
+            delayMs: 500,
+            flows: [
+              {
+                id: "FLOW_ID",
+                activationQuery: "ACTIVATION_QUERY",
+                shouldTrigger: shouldStartWorkflow,
+                showAskButton: false,
+                title: "Welcome",
+                description: "Let us show you the key steps.",
+                acceptText: "Show me",
+                skipText: "I'll explore on my own",
+              },
+            ],
+          },
+        }}
+      >
+        <AssistantButton />
+      </AgentProvider>
+    </>
+  );
+}
+```
+
+## Multiple Flows
+
+Use `requiresCompleted` to show a later flow only after another flow has
+finished. Use `startUrl` when a flow should begin from a specific page.
+
+```tsx
+forcedActivationFlow: {
+  enabled: currentUser.isNewUser,
+  triggerOn: 'first_visit',
+  flows: [
+    {
+      id: 'intro',
+      activationQuery: 'INTRO_GUIDE_QUERY',
+      shouldTrigger: isHomePage,
+      showAskButton: false,
+      title: 'Welcome',
+      description: 'Start with the main page.',
+      acceptText: 'Show me',
+      skipText: "I'll explore on my own",
+    },
+    {
+      id: 'upload',
+      activationQuery: 'UPLOAD_GUIDE_QUERY',
+      requiresCompleted: ['intro'],
+      shouldTrigger: isUploadPage,
+      startUrl: '/upload',
+      showAskButton: true,
+      title: 'Upload your first file',
+      description: 'Follow these steps to upload content.',
+      acceptText: "Let's upload",
+      skipText: 'Maybe later',
+    },
+  ],
+}
+```
+
+## Options
+
+| Option                         | Description                                                  |
+| ------------------------------ | ------------------------------------------------------------ |
+| `displayMode: 'headless'`      | Shows the guide in a small page overlay instead of full chat |
+| `headless.spotlight`           | Highlights the area the user should focus on                 |
+| `headless.animatedCursor`      | Points users toward the next action with cursor movement     |
+| `stability.afterReload`        | Continues the guide after a page reload                      |
+| `forcedActivationFlow.enabled` | Enables or disables Forced Workflow                          |
+| `triggerOn`                    | First visit, once per session, or repeated display for testing |
+| `flows[].urlPattern`           | Shows the guide only on matching URL patterns                |
+| `flows[].activationQuery`      | Selects which Moss guide to start                            |
+| `flows[].requiresCompleted`    | Shows this guide only after another guide is completed       |
+| `flows[].shouldTrigger`        | Checks whether this guide should appear on the current page  |
+| `flows[].startUrl`             | Opens the right page before starting the guide               |
+| `flows[].showAskButton`        | Lets users ask a question during the guide                   |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/en/sdk/configuration">
+    Review the full SDK configuration reference
+  </Card>
+  <Card title="Advanced" icon="sliders" href="/en/sdk/advanced">
+    Configure stability, Shadow DOM, and CSP
+  </Card>
+</CardGroup>
